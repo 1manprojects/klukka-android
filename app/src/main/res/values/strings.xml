@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Klukka</string>
+    <string name="hint_server_url">Server URL</string>
+    <string name="hint_api_token">API Token</string>
+    <string name="btn_save_login">Save &amp; Connect</string>
+    <string name="credentials_saved">Settings saved</string>
+    <string name="fill_all_fields">Please fill in all fields</string>
 </resources>
