@@ -1,0 +1,2238 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "",
+    "version" : ""
+  },
+  "components" : {
+    "securitySchemes" : {
+      "jwtCookie" : {
+        "in" : "cookie",
+        "name" : "jwt",
+        "type" : "apiKey"
+      },
+      "Authorization" : {
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    },
+    "schemas" : {
+      "Group" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "owner" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "id", "owner" ]
+      },
+      "Project" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "color" : {
+            "type" : "string"
+          },
+          "trackedThisMonth" : {
+            "type" : "number",
+            "format" : "double"
+          },
+          "ref" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "refType" : {
+            "$ref" : "#/components/schemas/RefType"
+          },
+          "archived" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "id", "trackedThisMonth", "ref", "archived" ]
+      },
+      "Start" : {
+        "type" : "object",
+        "properties" : {
+          "projectID" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "timeZone" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "projectID" ]
+      },
+      "Tracked" : {
+        "type" : "object",
+        "properties" : {
+          "user" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "projectId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "start" : {
+            "$ref" : "#/components/schemas/Timestamp"
+          },
+          "end" : {
+            "$ref" : "#/components/schemas/Timestamp"
+          },
+          "active" : {
+            "type" : "boolean"
+          },
+          "timezone" : {
+            "type" : "string"
+          },
+          "comment" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "user", "id", "projectId", "active" ]
+      },
+      "User" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "mail" : {
+            "type" : "string"
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Role"
+            }
+          }
+        },
+        "required" : [ "id" ]
+      },
+      "AdminData" : {
+        "type" : "object",
+        "properties" : {
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/User"
+            }
+          },
+          "groups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Group"
+            }
+          },
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          }
+        }
+      },
+      "AnalysisData" : {
+        "type" : "object",
+        "properties" : {
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          },
+          "groupProjects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          },
+          "tracked" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Tracked"
+            }
+          }
+        }
+      },
+      "ArchiveId" : {
+        "type" : "object",
+        "properties" : {
+          "projectId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "archive" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "projectId", "archive" ]
+      },
+      "CommentUpdate" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "comment" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "id" ]
+      },
+      "DataFilter" : {
+        "type" : "object",
+        "properties" : {
+          "start" : {
+            "type" : "string"
+          },
+          "end" : {
+            "type" : "string"
+          },
+          "groupId" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          }
+        }
+      },
+      "DepInfo" : {
+        "type" : "object",
+        "properties" : {
+          "frontend" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Deps"
+            }
+          },
+          "backend" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Deps"
+            }
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Deps" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          },
+          "license" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ExportFilter" : {
+        "type" : "object",
+        "properties" : {
+          "filter" : {
+            "$ref" : "#/components/schemas/DataFilter"
+          },
+          "detailed" : {
+            "type" : "boolean"
+          },
+          "groupId" : {
+            "format" : "int32",
+            "type" : [ "integer", "null" ]
+          }
+        },
+        "required" : [ "detailed" ]
+      },
+      "GroupDetails" : {
+        "type" : "object",
+        "properties" : {
+          "group" : {
+            "$ref" : "#/components/schemas/Group"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/User"
+            }
+          },
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          }
+        }
+      },
+      "GroupToUser" : {
+        "type" : "object",
+        "properties" : {
+          "groupId" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "mail" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "groupId" ]
+      },
+      "IdTupel" : {
+        "type" : "object",
+        "properties" : {
+          "id1" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "id2" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "id1", "id2" ]
+      },
+      "Login" : {
+        "type" : "object",
+        "properties" : {
+          "mail" : {
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PasswordReset" : {
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string"
+          },
+          "newPassword" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PrivacyInfo" : {
+        "type" : "object",
+        "properties" : {
+          "link" : {
+            "type" : "string"
+          },
+          "html" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Response" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "type" : "object"
+          }
+        }
+      },
+      "UserApiToken" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "expiration" : {
+            "anyOf" : [ {
+              "$ref" : "#/components/schemas/Timestamp"
+            }, {
+              "type" : "null"
+            } ]
+          }
+        },
+        "required" : [ "id" ]
+      },
+      "UserData" : {
+        "type" : "object",
+        "properties" : {
+          "user" : {
+            "$ref" : "#/components/schemas/User"
+          },
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          },
+          "groups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Group"
+            }
+          },
+          "tokens" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserApiToken"
+            }
+          }
+        }
+      },
+      "UserProjects" : {
+        "type" : "object",
+        "properties" : {
+          "own" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          },
+          "group" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          }
+        }
+      },
+      "RefType" : {
+        "type" : "string",
+        "enum" : [ "USER", "GROUP" ]
+      },
+      "Role" : {
+        "type" : "string",
+        "enum" : [ "USER", "GROUP", "ADMIN", "ANALYST" ]
+      },
+      "Timestamp" : {
+        "type" : "object",
+        "properties" : {
+          "year" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "month" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "date" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "day" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "hours" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "minutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "seconds" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "timezoneOffset" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "time" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nanos" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "year", "month", "date", "day", "hours", "minutes", "seconds", "timezoneOffset", "time", "nanos" ]
+      }
+    }
+  },
+  "paths" : {
+    "/api/active" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get Active Tracking",
+        "operationId" : "user getActiveTracking",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Tracked"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/admin" : {
+      "get" : {
+        "tags" : [ "Administration" ],
+        "summary" : "Get Admin Data",
+        "operationId" : "admin getAdminData",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminData"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/admin/deleteGroup" : {
+      "post" : {
+        "tags" : [ "Administration" ],
+        "summary" : "Delete Group",
+        "operationId" : "admin deleteGroup",
+        "requestBody" : {
+          "description" : "Group ID to delete",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                },
+                "example" : "true"
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/admin/deleteUser" : {
+      "post" : {
+        "tags" : [ "Administration" ],
+        "summary" : "Delete User",
+        "operationId" : "admin deleteUser",
+        "requestBody" : {
+          "description" : "User ID to delete",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                },
+                "example" : "true"
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/admin/invite" : {
+      "post" : {
+        "tags" : [ "Administration" ],
+        "summary" : "Add New User",
+        "operationId" : "admin addNewUser",
+        "requestBody" : {
+          "description" : "User object to add",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/User"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                },
+                "example" : "true"
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/admin/setPrivacy" : {
+      "post" : {
+        "tags" : [ "Administration" ],
+        "summary" : "POST Set Privacy HTML",
+        "operationId" : "admin setPrivacy",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/admin/updateRole" : {
+      "post" : {
+        "tags" : [ "Administration" ],
+        "summary" : "Update User Roles",
+        "operationId" : "admin updateRoles",
+        "requestBody" : {
+          "description" : "User object with updated roles",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/User"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                },
+                "example" : "true"
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/archive" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Archive Project",
+        "operationId" : "user archiveProject",
+        "requestBody" : {
+          "description" : "ArchiveId object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ArchiveId"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/archived" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get User Archived Projects",
+        "operationId" : "user getArchivedProjects",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserProjects"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/comment" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Update Comment",
+        "operationId" : "user updateComment",
+        "requestBody" : {
+          "description" : "Comment Update object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CommentUpdate"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/data" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Get Data to Analyse",
+        "operationId" : "user getDataToAnalyse",
+        "requestBody" : {
+          "description" : "DataFilter object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DataFilter"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AnalysisData"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/delete" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Delete Tracking Entry",
+        "operationId" : "user deleteTracking",
+        "requestBody" : {
+          "description" : "Tracking ID to delete",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/deleteProject" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Delete User Project",
+        "operationId" : "user deleteProject",
+        "requestBody" : {
+          "description" : "Project ID to delete",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/edit" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Update Project",
+        "operationId" : "user updateProject",
+        "requestBody" : {
+          "description" : "Project object to update",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Project"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/export" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Export User Data",
+        "operationId" : "user exportData",
+        "requestBody" : {
+          "description" : "Export filter",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExportFilter"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/csv" : { }
+            }
+          },
+          "503" : {
+            "description" : "SERVICE_UNAVAILABLE"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group" : {
+      "get" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Get Managed Groups",
+        "operationId" : "group getManagedGroups",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Group"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/addProject" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Add Project to Group",
+        "operationId" : "group addProject",
+        "requestBody" : {
+          "description" : "Project object to add to group",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Project"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/create" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Create New Group",
+        "operationId" : "group create",
+        "requestBody" : {
+          "description" : "Group object to create",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Group"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/data" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Get Group data for Analysis",
+        "operationId" : "group data for Analysis",
+        "requestBody" : {
+          "description" : "Data filter with GroupID set",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DataFilter"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupDetails"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/deleteGroup" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Delete Group",
+        "operationId" : "group delete",
+        "requestBody" : {
+          "description" : "Group ID to delete",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/deleteProject" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Delete Project from Group",
+        "operationId" : "group deleteProject",
+        "requestBody" : {
+          "description" : "IdTupel object (groupId, projectId)",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IdTupel"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/details" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Get Group Details",
+        "operationId" : "group getDetails",
+        "requestBody" : {
+          "description" : "Group ID",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupDetails"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/export" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Get Group Tracking Export",
+        "operationId" : "group data export",
+        "requestBody" : {
+          "description" : "Export filter with GroupID set",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExportFilter"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GroupDetails"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/invite" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Invite User to Group",
+        "operationId" : "group inviteUser",
+        "requestBody" : {
+          "description" : "GroupToUser object (groupId, mail)",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupToUser"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                },
+                "example" : "Invite sent | User does not exist | Error matching user to Group"
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/remove" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Remove User from Group",
+        "operationId" : "group removeUser",
+        "requestBody" : {
+          "description" : "GroupToUser object (groupId, mail)",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupToUser"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/group/update" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Update Group",
+        "operationId" : "group update",
+        "requestBody" : {
+          "description" : "Group object to update",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Group"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/info" : {
+      "get" : {
+        "summary" : "Info",
+        "operationId" : "info",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DepInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login" : {
+      "post" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Login",
+        "operationId" : "login",
+        "requestBody" : {
+          "description" : "Login Object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Login"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          },
+          "406" : {
+            "description" : "NOT_ACCEPTABLE"
+          }
+        }
+      }
+    },
+    "/api/login/check" : {
+      "post" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Validate Token for Password reset",
+        "operationId" : "login/check",
+        "requestBody" : {
+          "description" : "Password Reset Token String",
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              },
+              "example" : "PASSWORD_RESET_TOKEN"
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "204" : {
+            "description" : "NO_CONTENT"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":false}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/reset" : {
+      "post" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Request Password reset",
+        "operationId" : "login/reset",
+        "requestBody" : {
+          "description" : "Email String",
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              },
+              "example" : "user@mail.com"
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "204" : {
+            "description" : "NO_CONTENT"
+          }
+        }
+      }
+    },
+    "/api/login/token" : {
+      "post" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Reset User Password",
+        "operationId" : "login/token",
+        "requestBody" : {
+          "description" : "Password Reset Object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PasswordReset"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "404" : {
+            "description" : "NOT_FOUND"
+          },
+          "406" : {
+            "description" : "NOT_ACCEPTABLE"
+          }
+        }
+      }
+    },
+    "/api/logout" : {
+      "get" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Logout",
+        "operationId" : "logout",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/month" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get Tracked Minutes This Month",
+        "operationId" : "user getMonth",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "number",
+                  "format" : "double"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/privacy" : {
+      "get" : {
+        "summary" : "Get Link to Privacy Policy or Html as String",
+        "operationId" : "privacy",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PrivacyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get User Projects",
+        "operationId" : "user getProjects",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserProjects"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/refresh" : {
+      "get" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Refresh token from RefreshToken",
+        "operationId" : "refresh",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        }
+      }
+    },
+    "/api/role" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get User Role",
+        "operationId" : "user getRole",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/start" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Start Tracking Project",
+        "operationId" : "start",
+        "requestBody" : {
+          "description" : "Start Object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Start"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":23}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/update" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Update Tracking",
+        "operationId" : "user updateTracking",
+        "requestBody" : {
+          "description" : "Tracked object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Tracked"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/addPersonalProject" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Add Personal Project",
+        "operationId" : "user addPersonalProject",
+        "requestBody" : {
+          "description" : "Project object to add",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Project"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/changeMail" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Update User Email",
+        "operationId" : "user updateMail",
+        "requestBody" : {
+          "description" : "New email address",
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/createToken" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Create User Token",
+        "operationId" : "user createToken",
+        "requestBody" : {
+          "description" : "UserApiToken Object",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UserApiToken"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":\"Generated-Token\"}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          },
+          "500" : {
+            "description" : "INTERNAL_SERVER_ERROR"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/data" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get User Data",
+        "operationId" : "user getData",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "NO_CONTENT"
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/delete" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Delete User Account",
+        "operationId" : "user delete",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":23}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          },
+          "403" : {
+            "description" : "FORBIDDEN"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/deleteToken" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Delete User Token",
+        "operationId" : "user deleteToken",
+        "requestBody" : {
+          "description" : "Token ID to delete",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/leaveGroup" : {
+      "post" : {
+        "tags" : [ "Groups" ],
+        "summary" : "Leave Group",
+        "operationId" : "group leave",
+        "requestBody" : {
+          "description" : "Group ID to leave",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/listTokens" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Get User Tokens",
+        "operationId" : "user getTokens",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserApiToken"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/stopTracking" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Stop Tracking",
+        "operationId" : "user stopTracking",
+        "requestBody" : {
+          "description" : "Tracking ID to stop",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/updatePassword" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Update Password",
+        "operationId" : "user updatePassword",
+        "requestBody" : {
+          "description" : "New password",
+          "content" : {
+            "text/plain" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                },
+                "example" : "{\"payload\":true}"
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/validate" : {
+      "get" : {
+        "tags" : [ "Authentication" ],
+        "summary" : "Validate if cookie is still valid",
+        "operationId" : "validate",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/version" : {
+      "get" : {
+        "summary" : "Get version ",
+        "operationId" : "version",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
