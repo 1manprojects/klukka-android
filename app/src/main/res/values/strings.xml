@@ -5,4 +5,6 @@
     <string name="btn_save_login">Save &amp; Connect</string>
     <string name="credentials_saved">Settings saved</string>
     <string name="fill_all_fields">Please fill in all fields</string>
+    <string name="no_projects">No projects found</string>
+    <string name="add_project">Add project</string>
 </resources>

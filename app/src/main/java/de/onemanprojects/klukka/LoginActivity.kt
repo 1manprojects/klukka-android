@@ -1,5 +1,6 @@
 package de.onemanprojects.klukka
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -16,6 +17,15 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // If credentials already stored, go directly to projects
+        val secureStorage = SecureStorage(this)
+        if (secureStorage.hasCredentials()) {
+            startActivity(Intent(this, ProjectsActivity::class.java))
+            finish()
+            return
+        }
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
 
@@ -34,7 +44,8 @@ class LoginActivity : AppCompatActivity() {
 
         viewModel.saveResult.observe(this) { success ->
             if (success) {
-                Toast.makeText(this, getString(R.string.credentials_saved), Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, ProjectsActivity::class.java))
+                finish()
             }
         }
 
