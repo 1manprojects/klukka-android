@@ -32,5 +32,9 @@ class SecureStorage(context: Context) {
 
     fun getApiToken(): String = prefs.getString(KEY_API_TOKEN, "") ?: ""
 
+    fun clearToken() {
+        prefs.edit().remove(KEY_API_TOKEN).apply()
+    }
+
     fun hasCredentials(): Boolean = getServerUrl().isNotEmpty() && getApiToken().isNotEmpty()
 }

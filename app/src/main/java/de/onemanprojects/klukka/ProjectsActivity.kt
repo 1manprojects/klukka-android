@@ -1,5 +1,6 @@
 package de.onemanprojects.klukka
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -55,6 +56,15 @@ class ProjectsActivity : AppCompatActivity() {
         viewModel.error.observe(this) { errorMsg ->
             if (errorMsg != null) {
                 Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
+            }
+        }
+
+        viewModel.unauthorized.observe(this) { isUnauthorized ->
+            if (isUnauthorized == true) {
+                val intent = Intent(this, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(intent)
             }
         }
 

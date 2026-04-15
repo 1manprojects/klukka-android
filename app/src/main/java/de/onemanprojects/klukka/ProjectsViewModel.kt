@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class ProjectsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -22,6 +23,9 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> = _loading
 
+    private val _unauthorized = MutableLiveData<Boolean>()
+    val unauthorized: LiveData<Boolean> = _unauthorized
+
     fun loadProjects() {
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
@@ -35,6 +39,13 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 val result = service.getProjects("Bearer $apiToken")
                 val allProjects = (result.own ?: emptyList()) + (result.group ?: emptyList())
                 _projects.value = allProjects
+            } catch (e: HttpException) {
+                if (e.code() == 401) {
+                    secureStorage.clearToken()
+                    _unauthorized.value = true
+                } else {
+                    _error.value = e.message ?: "Unknown error"
+                }
             } catch (e: Exception) {
                 _error.value = e.message ?: "Unknown error"
             } finally {
