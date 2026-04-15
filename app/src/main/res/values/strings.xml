@@ -11,4 +11,6 @@
     <string name="title_archived">Archived</string>
     <string name="no_archived_projects">No archived projects</string>
     <string name="unarchive">Unarchive</string>
+    <string name="nav_projects">Projects</string>
+    <string name="nav_tracking">Tracking</string>
 </resources>

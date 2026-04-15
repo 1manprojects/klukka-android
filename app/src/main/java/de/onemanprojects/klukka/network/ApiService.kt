@@ -3,6 +3,7 @@ package de.onemanprojects.klukka.network
 import de.onemanprojects.klukka.model.ApiResponse
 import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.StartRequest
+import de.onemanprojects.klukka.model.Tracked
 import de.onemanprojects.klukka.model.UserProjects
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -38,4 +39,9 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body body: ArchiveRequest
     ): ApiResponse
+
+    @GET("api/active")
+    suspend fun getActiveTracking(
+        @Header("Authorization") token: String
+    ): Tracked
 }

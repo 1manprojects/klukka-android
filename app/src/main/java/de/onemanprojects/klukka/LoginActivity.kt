@@ -21,7 +21,7 @@ class LoginActivity : AppCompatActivity() {
         // If credentials already stored, go directly to projects
         val secureStorage = SecureStorage(this)
         if (secureStorage.hasCredentials()) {
-            startActivity(Intent(this, ProjectsActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
@@ -44,7 +44,7 @@ class LoginActivity : AppCompatActivity() {
 
         viewModel.saveResult.observe(this) { success ->
             if (success) {
-                startActivity(Intent(this, ProjectsActivity::class.java))
+                startActivity(Intent(this, MainActivity::class.java))
                 finish()
             }
         }

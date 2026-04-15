@@ -1,20 +1,99 @@
 package de.onemanprojects.klukka
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
+
+    private val mainViewModel: MainViewModel by viewModels()
+    private lateinit var bottomNav: BottomNavigationView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_root)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        bottomNav = findViewById(R.id.bottom_nav)
+
+        // Tracking tab starts hidden — only shown when a session is active
+        bottomNav.menu.findItem(R.id.nav_tracking).isVisible = false
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_projects -> showFragment(ProjectsFragment(), TAG_PROJECTS)
+                R.id.nav_archived -> showFragment(ArchivedProjectsFragment(), TAG_ARCHIVED)
+                R.id.nav_tracking -> {
+                    if (mainViewModel.activeTracking.value != null) {
+                        showFragment(ActiveTrackingFragment(), TAG_TRACKING)
+                    }
+                }
+            }
+            true
+        }
+
+        // Show/hide tracking tab and navigate when tracking state changes
+        mainViewModel.activeTracking.observe(this) { tracking ->
+            val trackingItem = bottomNav.menu.findItem(R.id.nav_tracking)
+            if (tracking != null) {
+                trackingItem.isVisible = true
+            } else {
+                trackingItem.isVisible = false
+                // If currently on tracking tab, navigate back to projects
+                if (bottomNav.selectedItemId == R.id.nav_tracking) {
+                    bottomNav.selectedItemId = R.id.nav_projects
+                }
+            }
+        }
+
+        // One-shot: navigate to tracking fragment when a session starts
+        mainViewModel.pendingNavToTracking.observe(this) { event ->
+            if (event != null) {
+                bottomNav.menu.findItem(R.id.nav_tracking).isVisible = true
+                showFragment(ActiveTrackingFragment(), TAG_TRACKING)
+                bottomNav.selectedItemId = R.id.nav_tracking
+                mainViewModel.onNavigatedToTracking()
+            }
+        }
+
+        mainViewModel.unauthorized.observe(this) { isUnauthorized ->
+            if (isUnauthorized == true) {
+                val intent = Intent(this, LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                startActivity(intent)
+            }
+        }
+
+        // Load initial fragment only on first creation (not on config change)
+        if (savedInstanceState == null) {
+            showFragment(ProjectsFragment(), TAG_PROJECTS)
+            bottomNav.selectedItemId = R.id.nav_projects
+            mainViewModel.checkActiveTracking()
+        }
+    }
+
+    private fun showFragment(fragment: Fragment, tag: String) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment, tag)
+            .commit()
+    }
+
+    companion object {
+        private const val TAG_PROJECTS = "projects"
+        private const val TAG_ARCHIVED = "archived"
+        private const val TAG_TRACKING = "tracking"
     }
 }
