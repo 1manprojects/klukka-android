@@ -8,8 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.onemanprojects.klukka.model.Project
 
-class ProjectAdapter(private var projects: List<Project>) :
-    RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
+class ProjectAdapter(
+    private var projects: List<Project>,
+    private val onProjectClick: (Project) -> Unit
+) : RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
 
     class ProjectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val colorAccent: View = itemView.findViewById(R.id.view_color_accent)
@@ -26,6 +28,7 @@ class ProjectAdapter(private var projects: List<Project>) :
     override fun onBindViewHolder(holder: ProjectViewHolder, position: Int) {
         val project = projects[position]
 
+        holder.itemView.setOnClickListener { onProjectClick(project) }
         holder.tvTitle.text = project.title ?: ""
         holder.tvComment.text = project.description ?: ""
 

@@ -28,6 +28,9 @@
         <activity
             android:name=".ProjectsActivity"
             android:exported="false" />
+        <activity
+            android:name=".ActiveTrackingActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

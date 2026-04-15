@@ -36,7 +36,9 @@ class ProjectsActivity : AppCompatActivity() {
         val tvEmpty = findViewById<TextView>(R.id.tv_empty)
         val fab = findViewById<FloatingActionButton>(R.id.fab_add_project)
 
-        adapter = ProjectAdapter(emptyList())
+        adapter = ProjectAdapter(emptyList()) { project ->
+            viewModel.startTracking(project)
+        }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -68,6 +70,22 @@ class ProjectsActivity : AppCompatActivity() {
             }
         }
 
+        viewModel.trackingStarted.observe(this) { event ->
+            if (event != null) {
+                viewModel.onTrackingNavigated()
+                val intent = Intent(this, ActiveTrackingActivity::class.java).apply {
+                    putExtra(ActiveTrackingActivity.EXTRA_TRACKING_ID, event.trackingId)
+                    putExtra(ActiveTrackingActivity.EXTRA_PROJECT_TITLE, event.project.title ?: "")
+                    putExtra(ActiveTrackingActivity.EXTRA_PROJECT_COMMENT, event.project.description ?: "")
+                    putExtra(ActiveTrackingActivity.EXTRA_START_TIME, event.startTime)
+                }
+                startActivity(intent)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
         viewModel.loadProjects()
     }
 }
