@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ProjectsActivity : AppCompatActivity() {
@@ -29,6 +30,15 @@ class ProjectsActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar_projects)
+        setSupportActionBar(toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_archived) {
+                startActivity(Intent(this, ArchivedProjectsActivity::class.java))
+                true
+            } else false
         }
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_projects)

@@ -1,6 +1,7 @@
 package de.onemanprojects.klukka.network
 
 import de.onemanprojects.klukka.model.ApiResponse
+import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.model.UserProjects
 import retrofit2.http.Body
@@ -25,5 +26,16 @@ interface ApiService {
     suspend fun stopTracking(
         @Header("Authorization") token: String,
         @Body id: Int
+    ): ApiResponse
+
+    @GET("api/archived")
+    suspend fun getArchivedProjects(
+        @Header("Authorization") token: String
+    ): UserProjects
+
+    @POST("api/archive")
+    suspend fun archiveProject(
+        @Header("Authorization") token: String,
+        @Body body: ArchiveRequest
     ): ApiResponse
 }

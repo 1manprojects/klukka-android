@@ -31,6 +31,9 @@
         <activity
             android:name=".ActiveTrackingActivity"
             android:exported="false" />
+        <activity
+            android:name=".ArchivedProjectsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

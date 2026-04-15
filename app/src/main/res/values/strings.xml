@@ -8,4 +8,7 @@
     <string name="no_projects">No projects found</string>
     <string name="add_project">Add project</string>
     <string name="stop_tracking">Stop tracking</string>
+    <string name="title_archived">Archived</string>
+    <string name="no_archived_projects">No archived projects</string>
+    <string name="unarchive">Unarchive</string>
 </resources>
