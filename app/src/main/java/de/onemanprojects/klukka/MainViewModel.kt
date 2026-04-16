@@ -10,6 +10,8 @@ import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 private const val TAG = "MainViewModel"
 
@@ -46,7 +48,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val allProjects = (userProjects.payload?.own ?: emptyList()) + (userProjects.payload?.group ?: emptyList())
                     val project = allProjects.find { it.id == tracked.projectId }
                         ?: Project(tracked.projectId, null, null, null, 0.0, tracked.projectId, false)
-                    val startMillis = tracked.start?.time ?: System.currentTimeMillis()
+                    val startMillis = parseStartTime(tracked.start) ?: System.currentTimeMillis()
                     val event = TrackingStartedEvent(tracked.id, project, startMillis)
                     _activeTracking.value = event
                     _pendingNavToTracking.value = event
@@ -77,6 +79,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** Called by MainActivity after it has handled the navigation event. */
     fun onNavigatedToTracking() {
         _pendingNavToTracking.value = null
+    }
+
+    /**
+     * Parses the server's start-time string, e.g. "Apr 16, 2026, 5:34:29 AM",
+     * into epoch milliseconds. Returns null if the string is null or unparseable.
+     */
+    private fun parseStartTime(raw: String?): Long? {
+        if (raw.isNullOrBlank()) return null
+        return try {
+            SimpleDateFormat("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH).parse(raw)?.time
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "Could not parse start time '$raw': ${e.message}")
+            null
+        }
     }
 
     /** Called by ActiveTrackingFragment when the session stops. */

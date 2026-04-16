@@ -1,10 +1,12 @@
 package de.onemanprojects.klukka.model
 
-data class TrackedTimestamp(val time: Long)
+import com.google.gson.annotations.SerializedName
 
 data class Tracked(
     val id: Int,
     val projectId: Int,
-    val active: Boolean,
-    val start: TrackedTimestamp?
+    @SerializedName("isActive") val active: Boolean,
+    val start: String?,
+    val timezone: String?,
+    val comment: String?
 )
