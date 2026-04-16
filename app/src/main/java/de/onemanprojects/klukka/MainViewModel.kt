@@ -49,7 +49,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val allProjects = (userProjects.payload?.own ?: emptyList()) + (userProjects.payload?.group ?: emptyList())
                     val project = allProjects.find { it.id == tracked.projectId }
                         ?: Project(tracked.projectId, null, null, null, 0.0, tracked.projectId, false)
-                    val startMillis = parseStartTime(tracked.start, tracked.timezone) ?: System.currentTimeMillis()
+                    val startMillis = parseStartTime(tracked.start) ?: System.currentTimeMillis()
                     val event = TrackingStartedEvent(tracked.id, project, startMillis)
                     _activeTracking.value = event
                     _pendingNavToTracking.value = event
@@ -83,18 +83,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Parses the server's start-time string (e.g. "Apr 16, 2026, 5:34:29 AM") using
-     * the timezone the server recorded the session in, so the elapsed time is correct
-     * regardless of the device's local timezone.
+     * Parses the server's start-time string (e.g. "Apr 16, 2026, 5:34:29 AM") as UTC.
+     * The server always returns times in UTC; subtracting this from System.currentTimeMillis()
+     * (also UTC) gives the correct elapsed duration.
      */
-    private fun parseStartTime(raw: String?, timezone: String?): Long? {
+    private fun parseStartTime(raw: String?): Long? {
         if (raw.isNullOrBlank()) return null
         return try {
             val sdf = SimpleDateFormat("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH)
-            sdf.timeZone = TimeZone.getTimeZone(timezone ?: "UTC")
+            sdf.timeZone = TimeZone.getTimeZone("UTC")
             sdf.parse(raw)?.time
         } catch (e: Exception) {
-            AppLogger.w(TAG, "Could not parse start time '$raw' (tz=$timezone): ${e.message}")
+            AppLogger.w(TAG, "Could not parse start time '$raw': ${e.message}")
             null
         }
     }
