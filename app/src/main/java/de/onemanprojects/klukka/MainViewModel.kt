@@ -92,7 +92,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return try {
             val sdf = SimpleDateFormat("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH)
             sdf.timeZone = TimeZone.getTimeZone("UTC")
-            sdf.parse(raw)?.time
+            val parsed = sdf.parse(raw)
+            if (parsed != null) {
+                AppLogger.i(TAG, "Parsed start time '$raw' → ${parsed.time} (${java.util.Date(parsed.time)})")
+            } else {
+                AppLogger.w(TAG, "SimpleDateFormat returned null for '$raw'")
+            }
+            parsed?.time
         } catch (e: Exception) {
             AppLogger.w(TAG, "Could not parse start time '$raw': ${e.message}")
             null

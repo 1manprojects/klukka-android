@@ -37,9 +37,11 @@ class ActiveTrackingFragment : Fragment() {
         tvTitle.text = event.project.title ?: ""
         tvComment.text = event.project.description ?: ""
 
+        AppLogger.i("ActiveTrackingFragment", "onViewCreated: event.startTime=${event.startTime} now=${System.currentTimeMillis()} expectedElapsed=${(System.currentTimeMillis() - event.startTime) / 1000}s")
         viewModel.startTimer(event.startTime)
 
         viewModel.elapsedSeconds.observe(viewLifecycleOwner) { seconds ->
+            AppLogger.i("ActiveTrackingFragment", "elapsedSeconds observer: seconds=$seconds")
             val h = seconds / 3600
             val m = (seconds % 3600) / 60
             val s = seconds % 60
