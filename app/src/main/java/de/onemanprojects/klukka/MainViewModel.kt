@@ -12,6 +12,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 
 private const val TAG = "MainViewModel"
 
@@ -48,7 +49,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val allProjects = (userProjects.payload?.own ?: emptyList()) + (userProjects.payload?.group ?: emptyList())
                     val project = allProjects.find { it.id == tracked.projectId }
                         ?: Project(tracked.projectId, null, null, null, 0.0, tracked.projectId, false)
-                    val startMillis = parseStartTime(tracked.start) ?: System.currentTimeMillis()
+                    val startMillis = parseStartTime(tracked.start, tracked.timezone) ?: System.currentTimeMillis()
                     val event = TrackingStartedEvent(tracked.id, project, startMillis)
                     _activeTracking.value = event
                     _pendingNavToTracking.value = event
@@ -82,15 +83,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Parses the server's start-time string, e.g. "Apr 16, 2026, 5:34:29 AM",
-     * into epoch milliseconds. Returns null if the string is null or unparseable.
+     * Parses the server's start-time string (e.g. "Apr 16, 2026, 5:34:29 AM") using
+     * the timezone the server recorded the session in, so the elapsed time is correct
+     * regardless of the device's local timezone.
      */
-    private fun parseStartTime(raw: String?): Long? {
+    private fun parseStartTime(raw: String?, timezone: String?): Long? {
         if (raw.isNullOrBlank()) return null
         return try {
-            SimpleDateFormat("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH).parse(raw)?.time
+            val sdf = SimpleDateFormat("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH)
+            sdf.timeZone = TimeZone.getTimeZone(timezone ?: "UTC")
+            sdf.parse(raw)?.time
         } catch (e: Exception) {
-            AppLogger.w(TAG, "Could not parse start time '$raw': ${e.message}")
+            AppLogger.w(TAG, "Could not parse start time '$raw' (tz=$timezone): ${e.message}")
             null
         }
     }
