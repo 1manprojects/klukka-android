@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import de.onemanprojects.klukka.model.Project
+import de.onemanprojects.klukka.model.ProjectSections
 import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
@@ -21,8 +22,8 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
 
     private val secureStorage = SecureStorage(application)
 
-    private val _projects = MutableLiveData<List<Project>>()
-    val projects: LiveData<List<Project>> = _projects
+    private val _projects = MutableLiveData<ProjectSections>()
+    val projects: LiveData<ProjectSections> = _projects
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
@@ -48,9 +49,10 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
             try {
                 val service = ApiClient.create(serverUrl)
                 val result = service.getProjects("Bearer $apiToken")
-                val allProjects = (result.payload?.own ?: emptyList()) + (result.payload?.group ?: emptyList())
-                AppLogger.i(TAG, "Loaded ${allProjects.size} projects (own=${result.payload?.own?.size ?: 0}, group=${result.payload?.group?.size ?: 0})")
-                _projects.value = allProjects
+                val own = result.payload?.own ?: emptyList()
+                val group = result.payload?.group ?: emptyList()
+                AppLogger.i(TAG, "Loaded projects (own=${own.size}, group=${group.size})")
+                _projects.value = ProjectSections(own, group)
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error loading projects: ${e.code()}", e)
                 if (e.code() == 401) {

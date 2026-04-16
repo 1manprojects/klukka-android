@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
+import de.onemanprojects.klukka.model.ProjectListItem
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,7 +37,7 @@ class ProjectsFragment : Fragment() {
         val fab = view.findViewById<FloatingActionButton>(R.id.fab_add_project)
 
         adapter = ProjectAdapter(emptyList()) { project ->
-            AppLogger.d(TAG, "Project tapped: id=${project.id} title=${project.title}")
+            AppLogger.i(TAG, "Project tapped: id=${project.id} title=${project.title}")
             viewModel.startTracking(project)
         }
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -53,9 +54,18 @@ class ProjectsFragment : Fragment() {
             swipeRefresh.isRefreshing = isLoading
         }
 
-        viewModel.projects.observe(viewLifecycleOwner) { projects ->
-            adapter.updateProjects(projects)
-            tvEmpty.visibility = if (projects.isEmpty()) View.VISIBLE else View.GONE
+        viewModel.projects.observe(viewLifecycleOwner) { sections ->
+            val items = mutableListOf<ProjectListItem>()
+            if (sections.own.isNotEmpty()) {
+                items.add(ProjectListItem.Header(getString(R.string.section_own_projects)))
+                sections.own.forEach { items.add(ProjectListItem.Entry(it)) }
+            }
+            if (sections.group.isNotEmpty()) {
+                items.add(ProjectListItem.Header(getString(R.string.section_group_projects)))
+                sections.group.forEach { items.add(ProjectListItem.Entry(it)) }
+            }
+            adapter.updateItems(items)
+            tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.error.observe(viewLifecycleOwner) { errorMsg ->

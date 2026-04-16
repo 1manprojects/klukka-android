@@ -16,6 +16,8 @@
     <string name="debug_logging">Debug Logging</string>
     <string name="debug_on">Debug logging enabled</string>
     <string name="debug_off">Debug logging disabled</string>
+    <string name="section_own_projects">Own Projects</string>
+    <string name="section_group_projects">Group Projects</string>
     <string name="error_invalid_url">Invalid URL — please enter a valid server address</string>
     <string name="warning_insecure_title">Insecure Connection</string>
     <string name="warning_insecure_message">This server uses HTTP which is not encrypted. Your credentials and data could be exposed to third parties. Proceed anyway?</string>

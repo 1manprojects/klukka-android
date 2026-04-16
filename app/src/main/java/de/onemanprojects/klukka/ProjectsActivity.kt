@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import de.onemanprojects.klukka.model.ProjectListItem
 
 class ProjectsActivity : AppCompatActivity() {
 
@@ -60,9 +61,18 @@ class ProjectsActivity : AppCompatActivity() {
             progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
-        viewModel.projects.observe(this) { projects ->
-            adapter.updateProjects(projects)
-            tvEmpty.visibility = if (projects.isEmpty()) View.VISIBLE else View.GONE
+        viewModel.projects.observe(this) { sections ->
+            val items = mutableListOf<ProjectListItem>()
+            if (sections.own.isNotEmpty()) {
+                items.add(ProjectListItem.Header(getString(R.string.section_own_projects)))
+                sections.own.forEach { items.add(ProjectListItem.Entry(it)) }
+            }
+            if (sections.group.isNotEmpty()) {
+                items.add(ProjectListItem.Header(getString(R.string.section_group_projects)))
+                sections.group.forEach { items.add(ProjectListItem.Entry(it)) }
+            }
+            adapter.updateItems(items)
+            tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
         }
 
         viewModel.error.observe(this) { errorMsg ->
