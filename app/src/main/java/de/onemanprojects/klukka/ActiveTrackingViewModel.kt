@@ -35,11 +35,13 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     fun startTimer(startTime: Long) {
         AppLogger.i(TAG, "Timer started, startTime=$startTime")
         timerJob?.cancel()
+        // Set the initial elapsed synchronously so the observer registered right after
+        // this call receives the correct value immediately (not the stale 0L default).
+        _elapsedSeconds.value = (System.currentTimeMillis() - startTime) / 1000L
         timerJob = viewModelScope.launch {
             while (true) {
-                val elapsed = (System.currentTimeMillis() - startTime) / 1000L
-                _elapsedSeconds.postValue(elapsed)
                 delay(1000)
+                _elapsedSeconds.value = (System.currentTimeMillis() - startTime) / 1000L
             }
         }
     }
