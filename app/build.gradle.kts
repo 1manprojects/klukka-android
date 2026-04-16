@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.swiperefreshlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

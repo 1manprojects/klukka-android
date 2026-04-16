@@ -16,7 +16,7 @@ import java.util.TimeZone
 
 private const val TAG = "ProjectsViewModel"
 
-data class TrackingStartedEvent(val trackingId: Int, val project: Project, val startTime: Long)
+data class TrackingStartedEvent(val trackingId: Int, val project: Project, val startTime: Long, val comment: String = "")
 
 class ProjectsViewModel(application: Application) : AndroidViewModel(application) {
 

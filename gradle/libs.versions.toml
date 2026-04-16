@@ -15,6 +15,7 @@ okhttp = "4.12.0"
 gson = "2.11.0"
 recyclerview = "1.4.0"
 fragmentKtx = "1.8.8"
+swiperefreshlayout = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,6 +34,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

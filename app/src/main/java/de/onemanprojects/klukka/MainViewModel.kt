@@ -9,10 +9,8 @@ import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 private const val TAG = "MainViewModel"
 
@@ -50,7 +48,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val project = allProjects.find { it.id == tracked.projectId }
                         ?: Project(tracked.projectId, null, null, null, 0.0, tracked.projectId, false)
                     val startMillis = parseStartTime(tracked.start) ?: System.currentTimeMillis()
-                    val event = TrackingStartedEvent(tracked.id, project, startMillis)
+                    AppLogger.i(TAG, "Active tracking start epoch: $startMillis elapsed=${(System.currentTimeMillis() - startMillis) / 1000}s")
+                    val event = TrackingStartedEvent(tracked.id, project, startMillis, tracked.comment ?: "")
                     _activeTracking.value = event
                     _pendingNavToTracking.value = event
                 } else {
@@ -82,27 +81,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _pendingNavToTracking.value = null
     }
 
-    /**
-     * Parses the server's start-time string (e.g. "Apr 16, 2026, 5:34:29 AM") as UTC.
-     * The server always returns times in UTC; subtracting this from System.currentTimeMillis()
-     * (also UTC) gives the correct elapsed duration.
-     */
+    // Matches "Apr 16, 2026, 5:34:29 AM" — uses \s to handle regular and narrow no-break spaces
+    // Server always sends UTC regardless of the timezone field
+    private val START_TIME_REGEX = Regex(
+        """(\w{3})\s+(\d{1,2}),\s+(\d{4}),\s+(\d{1,2}):(\d{2}):(\d{2})\s+(AM|PM)""",
+        RegexOption.IGNORE_CASE
+    )
+    private val MONTH_MAP = mapOf(
+        "jan" to 1, "feb" to 2, "mar" to 3, "apr" to 4,
+        "may" to 5, "jun" to 6, "jul" to 7, "aug" to 8,
+        "sep" to 9, "oct" to 10, "nov" to 11, "dec" to 12
+    )
+
     private fun parseStartTime(raw: String?): Long? {
         if (raw.isNullOrBlank()) return null
-        return try {
-            val sdf = SimpleDateFormat("MMM d, yyyy, h:mm:ss a", Locale.ENGLISH)
-            sdf.timeZone = TimeZone.getTimeZone("UTC")
-            val parsed = sdf.parse(raw)
-            if (parsed != null) {
-                AppLogger.i(TAG, "Parsed start time '$raw' → ${parsed.time} (${java.util.Date(parsed.time)})")
-            } else {
-                AppLogger.w(TAG, "SimpleDateFormat returned null for '$raw'")
-            }
-            parsed?.time
-        } catch (e: Exception) {
-            AppLogger.w(TAG, "Could not parse start time '$raw': ${e.message}")
-            null
+        val match = START_TIME_REGEX.find(raw.trim())
+        if (match == null) {
+            AppLogger.w(TAG, "Could not parse start time '$raw': no regex match")
+            return null
         }
+        val (monthStr, dayStr, yearStr, hourStr, minStr, secStr, ampm) = match.destructured
+        val month = MONTH_MAP[monthStr.lowercase()] ?: run {
+            AppLogger.w(TAG, "Unknown month '$monthStr' in '$raw'")
+            return null
+        }
+        var hour = hourStr.toInt()
+        if (ampm.uppercase() == "PM" && hour != 12) hour += 12
+        if (ampm.uppercase() == "AM" && hour == 12) hour = 0
+        val ldt = LocalDateTime.of(yearStr.toInt(), month, dayStr.toInt(), hour, minStr.toInt(), secStr.toInt())
+        val millis = ldt.toInstant(ZoneOffset.UTC).toEpochMilli()
+        AppLogger.i(TAG, "Parsed start time '$raw' → ${millis}ms")
+        return millis
     }
 
     /** Called by ActiveTrackingFragment when the session stops. */

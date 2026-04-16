@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.google.android.material.textfield.TextInputEditText
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.activityViewModels
@@ -33,9 +34,13 @@ class ActiveTrackingFragment : Fragment() {
         val tvElapsed = view.findViewById<TextView>(R.id.tv_elapsed_time)
         val progressSeconds = view.findViewById<CircularProgressIndicator>(R.id.progress_seconds)
         val btnStop = view.findViewById<FloatingActionButton>(R.id.btn_stop)
+        val etComment = view.findViewById<TextInputEditText>(R.id.et_comment)
 
         tvTitle.text = event.project.title ?: ""
         tvComment.text = event.project.description ?: ""
+        if (event.comment.isNotBlank()) {
+            etComment.setText(event.comment)
+        }
 
         AppLogger.i("ActiveTrackingFragment", "onViewCreated: event.startTime=${event.startTime} now=${System.currentTimeMillis()} expectedElapsed=${(System.currentTimeMillis() - event.startTime) / 1000}s")
         viewModel.startTimer(event.startTime)

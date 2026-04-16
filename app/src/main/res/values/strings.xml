@@ -28,4 +28,6 @@
     <string name="error_api_stop_tracking">Failed to stop tracking</string>
     <string name="error_api_load_archived">Failed to load archived projects</string>
     <string name="error_api_unarchive">Failed to unarchive project</string>
+    <string name="comment_label">Comment</string>
+    <string name="comment_placeholder">Comments</string>
 </resources>

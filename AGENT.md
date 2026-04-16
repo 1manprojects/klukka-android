@@ -24,6 +24,8 @@ The OpenAPI specification is located at:
 
 /docs/openapi.json
 
+All Responses are wrapped in a {"payload": T} response with T being the Object from API docs
+
 When implementing API calls:
 - Always read this file first
 - Do not guess endpoints or payloads
