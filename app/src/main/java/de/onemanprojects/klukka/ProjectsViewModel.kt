@@ -48,8 +48,8 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
             try {
                 val service = ApiClient.create(serverUrl)
                 val result = service.getProjects("Bearer $apiToken")
-                val allProjects = (result.own ?: emptyList()) + (result.group ?: emptyList())
-                AppLogger.i(TAG, "Loaded ${allProjects.size} projects (own=${result.own?.size ?: 0}, group=${result.group?.size ?: 0})")
+                val allProjects = (result.payload?.own ?: emptyList()) + (result.payload?.group ?: emptyList())
+                AppLogger.i(TAG, "Loaded ${allProjects.size} projects (own=${result.payload?.own?.size ?: 0}, group=${result.payload?.group?.size ?: 0})")
                 _projects.value = allProjects
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error loading projects: ${e.code()}", e)

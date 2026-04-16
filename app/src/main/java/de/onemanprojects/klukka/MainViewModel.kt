@@ -9,6 +9,9 @@ import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
+
+private const val TAG = "MainViewModel"
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -31,27 +34,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val apiToken = secureStorage.getApiToken()
         if (serverUrl.isEmpty() || apiToken.isEmpty()) return
 
+        AppLogger.d(TAG, "Checking for active tracking session")
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-                val tracked = service.getActiveTracking("Bearer $apiToken")
-                if (tracked.active) {
+                val trackedResponse = service.getActiveTracking("Bearer $apiToken")
+                val tracked = trackedResponse.payload
+                if (tracked != null && tracked.active) {
+                    AppLogger.i(TAG, "Active tracking found: id=${tracked.id} projectId=${tracked.projectId}")
                     val userProjects = service.getProjects("Bearer $apiToken")
-                    val allProjects = (userProjects.own ?: emptyList()) + (userProjects.group ?: emptyList())
+                    val allProjects = (userProjects.payload?.own ?: emptyList()) + (userProjects.payload?.group ?: emptyList())
                     val project = allProjects.find { it.id == tracked.projectId }
                         ?: Project(tracked.projectId, null, null, null, 0.0, tracked.projectId, false)
                     val startMillis = tracked.start?.time ?: System.currentTimeMillis()
                     val event = TrackingStartedEvent(tracked.id, project, startMillis)
                     _activeTracking.value = event
                     _pendingNavToTracking.value = event
+                } else {
+                    AppLogger.i(TAG, "No active tracking session")
                 }
             } catch (e: HttpException) {
+                AppLogger.w(TAG, "HTTP ${e.code()} checking active tracking")
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
                 }
                 // Other codes: no active tracking – silently ignore
             } catch (e: Exception) {
+                AppLogger.w(TAG, "Could not check active tracking: ${e.message}")
                 // Network error on startup – silently ignore
             }
         }
@@ -59,6 +69,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     /** Called by ProjectsFragment when a tracking session starts. */
     fun onTrackingStarted(event: TrackingStartedEvent) {
+        AppLogger.d(TAG, "Tracking started: id=${event.trackingId} project=${event.project.title}")
         _activeTracking.value = event
         _pendingNavToTracking.value = event
     }
@@ -70,6 +81,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     /** Called by ActiveTrackingFragment when the session stops. */
     fun onTrackingStopped() {
+        AppLogger.d(TAG, "Tracking stopped")
         _activeTracking.value = null
     }
 }

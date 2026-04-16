@@ -2,9 +2,9 @@ package de.onemanprojects.klukka.network
 
 import de.onemanprojects.klukka.model.ApiResponse
 import de.onemanprojects.klukka.model.ArchiveRequest
+import de.onemanprojects.klukka.model.ProjectsResponse
 import de.onemanprojects.klukka.model.StartRequest
-import de.onemanprojects.klukka.model.Tracked
-import de.onemanprojects.klukka.model.UserProjects
+import de.onemanprojects.klukka.model.TrackedResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -15,7 +15,7 @@ interface ApiService {
     @GET("api/projects")
     suspend fun getProjects(
         @Header("Authorization") token: String
-    ): UserProjects
+    ): ProjectsResponse
 
     @POST("api/start")
     suspend fun startTracking(
@@ -32,7 +32,7 @@ interface ApiService {
     @GET("api/archived")
     suspend fun getArchivedProjects(
         @Header("Authorization") token: String
-    ): UserProjects
+    ): ProjectsResponse
 
     @POST("api/archive")
     suspend fun archiveProject(
@@ -43,5 +43,5 @@ interface ApiService {
     @GET("api/active")
     suspend fun getActiveTracking(
         @Header("Authorization") token: String
-    ): Tracked
+    ): TrackedResponse
 }
