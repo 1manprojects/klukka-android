@@ -68,11 +68,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // One-shot: navigate to tracking fragment when a session starts
+        // One-shot: navigate to the tracking tab when a session starts or is detected on
+        // startup. activeTracking observer already made the tab visible; setting
+        // selectedItemId triggers the nav listener which shows the fragment (once).
         mainViewModel.pendingNavToTracking.observe(this) { event ->
             if (event != null) {
-                bottomNav.menu.findItem(R.id.nav_tracking).isVisible = true
-                showFragment(ActiveTrackingFragment(), TAG_TRACKING)
                 bottomNav.selectedItemId = R.id.nav_tracking
                 mainViewModel.onNavigatedToTracking()
             }

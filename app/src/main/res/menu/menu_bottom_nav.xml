@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Tracking is hidden by default; made visible when a session is active.
+         Placed first so it appears on the left side of the nav bar when shown. -->
+    <item
+        android:id="@+id/nav_tracking"
+        android:icon="@drawable/ic_timer"
+        android:title="@string/nav_tracking" />
+
     <item
         android:id="@+id/nav_projects"
         android:icon="@drawable/ic_projects"
@@ -10,10 +17,5 @@
         android:id="@+id/nav_archived"
         android:icon="@drawable/ic_archive"
         android:title="@string/title_archived" />
-
-    <item
-        android:id="@+id/nav_tracking"
-        android:icon="@drawable/ic_timer"
-        android:title="@string/nav_tracking" />
 
 </menu>
