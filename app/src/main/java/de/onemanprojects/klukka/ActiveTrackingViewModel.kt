@@ -33,7 +33,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     private var timerJob: Job? = null
 
     fun startTimer(startTime: Long) {
-        AppLogger.d(TAG, "Timer started, startTime=$startTime")
+        AppLogger.i(TAG, "Timer started, startTime=$startTime")
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (true) {
@@ -45,7 +45,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun stopTracking(trackingId: Int) {
-        AppLogger.d(TAG, "Stopping tracking id=$trackingId")
+        AppLogger.i(TAG, "Stopping tracking id=$trackingId")
         timerJob?.cancel()
 
         val serverUrl = secureStorage.getServerUrl()
@@ -55,7 +55,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
             try {
                 val service = ApiClient.create(serverUrl)
                 service.stopTracking("Bearer $apiToken", trackingId)
-                AppLogger.d(TAG, "Tracking stopped id=$trackingId")
+                AppLogger.i(TAG, "Tracking stopped id=$trackingId")
                 _trackingStopped.value = true
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error stopping tracking: ${e.code()}", e)

@@ -40,7 +40,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
-        AppLogger.d(TAG, "Loading projects from $serverUrl")
+        AppLogger.i(TAG, "Loading projects from $serverUrl")
         _loading.value = true
         _error.value = null
 
@@ -49,7 +49,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 val service = ApiClient.create(serverUrl)
                 val result = service.getProjects("Bearer $apiToken")
                 val allProjects = (result.own ?: emptyList()) + (result.group ?: emptyList())
-                AppLogger.d(TAG, "Loaded ${allProjects.size} projects (own=${result.own?.size ?: 0}, group=${result.group?.size ?: 0})")
+                AppLogger.i(TAG, "Loaded ${allProjects.size} projects (own=${result.own?.size ?: 0}, group=${result.group?.size ?: 0})")
                 _projects.value = allProjects
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error loading projects: ${e.code()}", e)
@@ -75,7 +75,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
-        AppLogger.d(TAG, "Starting tracking for project id=${project.id} title=${project.title}")
+        AppLogger.i(TAG, "Starting tracking for project id=${project.id} title=${project.title}")
 
         viewModelScope.launch {
             try {
@@ -86,7 +86,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 )
                 val trackingId = response.payload?.asInt
                     ?: throw Exception("Invalid tracking ID in response")
-                AppLogger.d(TAG, "Tracking started, id=$trackingId")
+                AppLogger.i(TAG, "Tracking started, id=$trackingId")
                 _trackingStarted.value = TrackingStartedEvent(trackingId, project, System.currentTimeMillis())
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error starting tracking: ${e.code()}", e)

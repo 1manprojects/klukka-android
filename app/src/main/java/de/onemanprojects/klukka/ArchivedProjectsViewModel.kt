@@ -34,7 +34,7 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
-        AppLogger.d(TAG, "Loading archived projects from $serverUrl")
+        AppLogger.i(TAG, "Loading archived projects from $serverUrl")
         _loading.value = true
         _error.value = null
 
@@ -43,7 +43,7 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
                 val service = ApiClient.create(serverUrl)
                 val result = service.getArchivedProjects("Bearer $apiToken")
                 val allProjects = (result.own ?: emptyList()) + (result.group ?: emptyList())
-                AppLogger.d(TAG, "Loaded ${allProjects.size} archived projects")
+                AppLogger.i(TAG, "Loaded ${allProjects.size} archived projects")
                 _projects.value = allProjects
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error loading archived projects: ${e.code()}", e)
@@ -69,13 +69,13 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
-        AppLogger.d(TAG, "Unarchiving project id=$projectId")
+        AppLogger.i(TAG, "Unarchiving project id=$projectId")
 
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
                 service.archiveProject("Bearer $apiToken", ArchiveRequest(projectId, archive = false))
-                AppLogger.d(TAG, "Project $projectId unarchived, reloading list")
+                AppLogger.i(TAG, "Project $projectId unarchived, reloading list")
                 loadArchivedProjects()
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error unarchiving project: ${e.code()}", e)
