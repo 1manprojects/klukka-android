@@ -5,13 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+
+private const val TAG = "ArchivedFragment"
 
 class ArchivedProjectsFragment : Fragment() {
 
@@ -25,18 +27,24 @@ class ArchivedProjectsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val swipeRefresh = view.findViewById<SwipeRefreshLayout>(R.id.swipe_refresh_archived)
         val recyclerView = view.findViewById<RecyclerView>(R.id.rv_archived_projects)
-        val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_archived)
         val tvEmpty = view.findViewById<TextView>(R.id.tv_empty_archived)
 
         adapter = ArchivedProjectAdapter(emptyList()) { project ->
+            AppLogger.d(TAG, "Unarchive tapped: id=${project.id} title=${project.title}")
             viewModel.unarchiveProject(project.id)
         }
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
+        swipeRefresh.setOnRefreshListener {
+            AppLogger.d(TAG, "Manual refresh triggered")
+            viewModel.loadArchivedProjects()
+        }
+
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
-            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            swipeRefresh.isRefreshing = isLoading
         }
 
         viewModel.projects.observe(viewLifecycleOwner) { projects ->
@@ -46,7 +54,7 @@ class ArchivedProjectsFragment : Fragment() {
 
         viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
             if (errorMsg != null) {
-                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+                Snackbar.make(requireView(), errorMsg, Snackbar.LENGTH_LONG).show()
             }
         }
 

@@ -10,7 +10,10 @@ import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
 import java.util.TimeZone
+
+private const val TAG = "ProjectsViewModel"
 
 data class TrackingStartedEvent(val trackingId: Int, val project: Project, val startTime: Long)
 
@@ -37,6 +40,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
+        AppLogger.d(TAG, "Loading projects from $serverUrl")
         _loading.value = true
         _error.value = null
 
@@ -45,16 +49,22 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 val service = ApiClient.create(serverUrl)
                 val result = service.getProjects("Bearer $apiToken")
                 val allProjects = (result.own ?: emptyList()) + (result.group ?: emptyList())
+                AppLogger.d(TAG, "Loaded ${allProjects.size} projects (own=${result.own?.size ?: 0}, group=${result.group?.size ?: 0})")
                 _projects.value = allProjects
             } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error loading projects: ${e.code()}", e)
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
                 } else {
-                    _error.value = e.message ?: "Unknown error"
+                    _error.value = "Failed to load projects — server error (${e.code()})"
                 }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error loading projects", e)
+                _error.value = "Network error: could not reach the server"
             } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error"
+                AppLogger.e(TAG, "Error loading projects", e)
+                _error.value = "Failed to load projects"
             } finally {
                 _loading.value = false
             }
@@ -65,6 +75,8 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
+        AppLogger.d(TAG, "Starting tracking for project id=${project.id} title=${project.title}")
+
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
@@ -74,16 +86,22 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 )
                 val trackingId = response.payload?.asInt
                     ?: throw Exception("Invalid tracking ID in response")
+                AppLogger.d(TAG, "Tracking started, id=$trackingId")
                 _trackingStarted.value = TrackingStartedEvent(trackingId, project, System.currentTimeMillis())
             } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error starting tracking: ${e.code()}", e)
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
                 } else {
-                    _error.value = e.message ?: "Unknown error"
+                    _error.value = "Failed to start tracking — server error (${e.code()})"
                 }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error starting tracking", e)
+                _error.value = "Network error: could not reach the server"
             } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error"
+                AppLogger.e(TAG, "Error starting tracking", e)
+                _error.value = "Failed to start tracking"
             }
         }
     }

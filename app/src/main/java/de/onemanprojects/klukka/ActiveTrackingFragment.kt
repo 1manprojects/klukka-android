@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -59,7 +59,7 @@ class ActiveTrackingFragment : Fragment() {
 
         viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
             if (errorMsg != null) {
-                Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
+                Snackbar.make(requireView(), errorMsg, Snackbar.LENGTH_LONG).show()
             }
         }
 

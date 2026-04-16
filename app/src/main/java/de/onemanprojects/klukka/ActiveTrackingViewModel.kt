@@ -10,6 +10,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
+
+private const val TAG = "ActiveTrackingVM"
 
 class ActiveTrackingViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -30,6 +33,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     private var timerJob: Job? = null
 
     fun startTimer(startTime: Long) {
+        AppLogger.d(TAG, "Timer started, startTime=$startTime")
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (true) {
@@ -41,6 +45,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun stopTracking(trackingId: Int) {
+        AppLogger.d(TAG, "Stopping tracking id=$trackingId")
         timerJob?.cancel()
 
         val serverUrl = secureStorage.getServerUrl()
@@ -50,17 +55,24 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
             try {
                 val service = ApiClient.create(serverUrl)
                 service.stopTracking("Bearer $apiToken", trackingId)
+                AppLogger.d(TAG, "Tracking stopped id=$trackingId")
                 _trackingStopped.value = true
             } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error stopping tracking: ${e.code()}", e)
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
                 } else {
-                    _error.value = e.message ?: "Unknown error"
+                    _error.value = "Failed to stop tracking — server error (${e.code()})"
                     startTimer(System.currentTimeMillis() - (_elapsedSeconds.value ?: 0L) * 1000L)
                 }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error stopping tracking", e)
+                _error.value = "Network error: could not reach the server"
+                startTimer(System.currentTimeMillis() - (_elapsedSeconds.value ?: 0L) * 1000L)
             } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error"
+                AppLogger.e(TAG, "Error stopping tracking", e)
+                _error.value = "Failed to stop tracking"
                 startTimer(System.currentTimeMillis() - (_elapsedSeconds.value ?: 0L) * 1000L)
             }
         }

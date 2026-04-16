@@ -10,6 +10,9 @@ import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
+
+private const val TAG = "ArchivedProjectsVM"
 
 class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -31,6 +34,7 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
+        AppLogger.d(TAG, "Loading archived projects from $serverUrl")
         _loading.value = true
         _error.value = null
 
@@ -39,16 +43,22 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
                 val service = ApiClient.create(serverUrl)
                 val result = service.getArchivedProjects("Bearer $apiToken")
                 val allProjects = (result.own ?: emptyList()) + (result.group ?: emptyList())
+                AppLogger.d(TAG, "Loaded ${allProjects.size} archived projects")
                 _projects.value = allProjects
             } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error loading archived projects: ${e.code()}", e)
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
                 } else {
-                    _error.value = e.message ?: "Unknown error"
+                    _error.value = "Failed to load archived projects — server error (${e.code()})"
                 }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error loading archived projects", e)
+                _error.value = "Network error: could not reach the server"
             } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error"
+                AppLogger.e(TAG, "Error loading archived projects", e)
+                _error.value = "Failed to load archived projects"
             } finally {
                 _loading.value = false
             }
@@ -59,20 +69,28 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
+        AppLogger.d(TAG, "Unarchiving project id=$projectId")
+
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
                 service.archiveProject("Bearer $apiToken", ArchiveRequest(projectId, archive = false))
+                AppLogger.d(TAG, "Project $projectId unarchived, reloading list")
                 loadArchivedProjects()
             } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error unarchiving project: ${e.code()}", e)
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
                 } else {
-                    _error.value = e.message ?: "Unknown error"
+                    _error.value = "Failed to unarchive project — server error (${e.code()})"
                 }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error unarchiving project", e)
+                _error.value = "Network error: could not reach the server"
             } catch (e: Exception) {
-                _error.value = e.message ?: "Unknown error"
+                AppLogger.e(TAG, "Error unarchiving project", e)
+                _error.value = "Failed to unarchive project"
             }
         }
     }

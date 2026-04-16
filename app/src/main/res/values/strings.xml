@@ -13,4 +13,17 @@
     <string name="unarchive">Unarchive</string>
     <string name="nav_projects">Projects</string>
     <string name="nav_tracking">Tracking</string>
+    <string name="debug_logging">Debug Logging</string>
+    <string name="debug_on">Debug logging enabled</string>
+    <string name="debug_off">Debug logging disabled</string>
+    <string name="error_invalid_url">Invalid URL — please enter a valid server address</string>
+    <string name="warning_insecure_title">Insecure Connection</string>
+    <string name="warning_insecure_message">This server uses HTTP which is not encrypted. Your credentials and data could be exposed to third parties. Proceed anyway?</string>
+    <string name="btn_proceed_anyway">Proceed Anyway</string>
+    <string name="error_network">Network error: could not reach the server</string>
+    <string name="error_api_load_projects">Failed to load projects</string>
+    <string name="error_api_start_tracking">Failed to start tracking</string>
+    <string name="error_api_stop_tracking">Failed to stop tracking</string>
+    <string name="error_api_load_archived">Failed to load archived projects</string>
+    <string name="error_api_unarchive">Failed to unarchive project</string>
 </resources>
