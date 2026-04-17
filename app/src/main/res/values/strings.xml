@@ -85,4 +85,5 @@
     <string name="delete_account_confirm_title">Are you absolutely sure?</string>
     <string name="delete_account_message_2">All your tracking data, projects, groups, and account information will be permanently and irreversibly deleted. There is no way to recover this data. Do you want to proceed?</string>
     <string name="delete_account_confirm_btn">Delete My Account</string>
+    <string name="tracked_duration_label">Duration:</string>
 </resources>

@@ -128,6 +128,7 @@ class EditTrackedDialogFragment : BottomSheetDialogFragment() {
         val etEndDate = view.findViewById<TextInputEditText>(R.id.et_end_date)
         val etEndTime = view.findViewById<TextInputEditText>(R.id.et_end_time)
         val etComment = view.findViewById<TextInputEditText>(R.id.et_comment)
+        val tvTrackedDuration = view.findViewById<TextView>(R.id.tv_tracked_duration)
         val btnSave = view.findViewById<MaterialButton>(R.id.btn_save)
         val btnDelete = view.findViewById<MaterialButton>(R.id.btn_delete)
 
@@ -157,14 +158,32 @@ class EditTrackedDialogFragment : BottomSheetDialogFragment() {
             Instant.ofEpochMilli(it).atOffset(ZoneOffset.UTC).toLocalDateTime()
         } ?: if (isNewEntry) startDateTime?.plusHours(1) else null
 
+        fun updateDurationDisplay() {
+            val s = startDateTime
+            val e = endDateTime
+            if (s != null && e != null) {
+                val ms = (e.toInstant(ZoneOffset.UTC).toEpochMilli() -
+                        s.toInstant(ZoneOffset.UTC).toEpochMilli()).coerceAtLeast(0)
+                val totalSecs = ms / 1000
+                val h = totalSecs / 3600
+                val m = (totalSecs % 3600) / 60
+                val sec = totalSecs % 60
+                tvTrackedDuration.text = String.format("%dh %02dm %02ds", h, m, sec)
+            } else {
+                tvTrackedDuration.text = "—"
+            }
+        }
+
         fun updateStartDisplay() {
             etStartDate.setText(startDateTime?.format(dateDisplayFmt) ?: "")
             etStartTime.setText(startDateTime?.format(timeDisplayFmt) ?: "")
+            updateDurationDisplay()
         }
 
         fun updateEndDisplay() {
             etEndDate.setText(endDateTime?.format(dateDisplayFmt) ?: "")
             etEndTime.setText(endDateTime?.format(timeDisplayFmt) ?: "")
+            updateDurationDisplay()
         }
 
         updateStartDisplay()

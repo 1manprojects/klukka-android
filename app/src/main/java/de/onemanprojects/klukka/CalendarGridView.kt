@@ -241,16 +241,37 @@ class CalendarGridView @JvmOverloads constructor(
                 canvas.drawRoundRect(eventRect, cornerRadiusPx, cornerRadiusPx, eventFillPaint)
                 eventHitAreas.add(Pair(RectF(eventRect), tracked))
 
-                // Title text when there is enough vertical space
+                // Text content — only drawn when the block is tall enough
                 if (bottom - top >= 16f * d) {
                     eventTextPaint.color = contrastColor(color)
+                    val textX = colLeft + 4f * d
+                    val lineH = (TEXT_EVENT_DP + 2f) * d
+
+                    // Line 1: project title
                     val title = project?.title ?: "#${tracked.projectId}"
-                    canvas.drawText(
-                        title,
-                        colLeft + 4f * d,
-                        top + TEXT_EVENT_DP * d + 2f * d,
-                        eventTextPaint
-                    )
+                    canvas.drawText(title, textX, top + lineH, eventTextPaint)
+
+                    // Line 2: duration in h / m
+                    if (bottom - top >= lineH * 2f) {
+                        val durationMs = (endMs - startMs).coerceAtLeast(0)
+                        val totalMins = (durationMs / 60_000L).toInt()
+                        val hours = totalMins / 60
+                        val mins = totalMins % 60
+                        val durationText = when {
+                            hours > 0 && mins > 0 -> "${hours}h ${mins}m"
+                            hours > 0 -> "${hours}h"
+                            else -> "${mins}m"
+                        }
+                        canvas.drawText(durationText, textX, top + lineH * 2f, eventTextPaint)
+                    }
+
+                    // Line 3: comment (truncated to fit)
+                    if (!tracked.comment.isNullOrBlank() && bottom - top >= lineH * 3f) {
+                        val comment = tracked.comment!!.let {
+                            if (it.length > 18) it.take(17) + "…" else it
+                        }
+                        canvas.drawText(comment, textX, top + lineH * 3f, eventTextPaint)
+                    }
                 }
             }
         }
