@@ -5,7 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import de.onemanprojects.klukka.model.CommentUpdate
 import de.onemanprojects.klukka.network.ApiClient
+import de.onemanprojects.klukka.network.ApiService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,6 +15,7 @@ import retrofit2.HttpException
 import java.io.IOException
 
 private const val TAG = "ActiveTrackingVM"
+private const val COMMENT_DEBOUNCE_MS = 1000L
 
 class ActiveTrackingViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -31,14 +34,16 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     val unauthorized: LiveData<Boolean> = _unauthorized
 
     private var timerJob: Job? = null
+    private var commentDebounceJob: Job? = null
+
+    // Holds the latest comment text that has not yet been sent to the server
+    private var pendingComment: String? = null
 
     fun startTimer(startTime: Long) {
         val nowMs = System.currentTimeMillis()
         val initialElapsed = (nowMs - startTime) / 1000L
         AppLogger.i(TAG, "Timer started: startTime=$startTime now=$nowMs initialElapsed=${initialElapsed}s")
         timerJob?.cancel()
-        // Set the initial elapsed synchronously so the observer registered right after
-        // this call receives the correct value immediately (not the stale 0L default).
         _elapsedSeconds.value = initialElapsed
         timerJob = viewModelScope.launch {
             while (true) {
@@ -48,9 +53,36 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
+    /** Called whenever the comment field changes. Resets the debounce timer. */
+    fun onCommentChanged(trackingId: Int, comment: String) {
+        pendingComment = comment
+        commentDebounceJob?.cancel()
+        commentDebounceJob = viewModelScope.launch {
+            delay(COMMENT_DEBOUNCE_MS)
+            val service = ApiClient.create(secureStorage.getServerUrl())
+            flushComment(service, trackingId)
+        }
+    }
+
+    /** Sends a pending comment update if one exists. No-op if nothing is pending. */
+    private suspend fun flushComment(service: ApiService, trackingId: Int) {
+        val comment = pendingComment ?: return
+        pendingComment = null
+        val apiToken = secureStorage.getApiToken()
+        try {
+            service.updateComment("Bearer $apiToken", CommentUpdate(trackingId, comment))
+            AppLogger.i(TAG, "Comment updated for tracking id=$trackingId")
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "Failed to update comment: ${e.message}")
+            // Restore so a subsequent stop can retry
+            if (pendingComment == null) pendingComment = comment
+        }
+    }
+
     fun stopTracking(trackingId: Int) {
         AppLogger.i(TAG, "Stopping tracking id=$trackingId")
         timerJob?.cancel()
+        commentDebounceJob?.cancel()
 
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
@@ -58,6 +90,10 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
+
+                // Flush any unsent comment before stopping
+                flushComment(service, trackingId)
+
                 service.stopTracking("Bearer $apiToken", trackingId)
                 AppLogger.i(TAG, "Tracking stopped id=$trackingId")
                 _trackingStopped.value = true
@@ -84,6 +120,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
 
     override fun onCleared() {
         timerJob?.cancel()
+        commentDebounceJob?.cancel()
         super.onCleared()
     }
 }

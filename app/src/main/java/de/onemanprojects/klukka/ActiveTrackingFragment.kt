@@ -2,6 +2,8 @@ package de.onemanprojects.klukka
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +43,15 @@ class ActiveTrackingFragment : Fragment() {
         if (event.comment.isNotBlank()) {
             etComment.setText(event.comment)
         }
+
+        // Add TextWatcher after setting initial text to avoid a spurious debounce trigger
+        etComment.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.onCommentChanged(event.trackingId, s?.toString() ?: "")
+            }
+        })
 
         AppLogger.i("ActiveTrackingFragment", "onViewCreated: event.startTime=${event.startTime} now=${System.currentTimeMillis()} expectedElapsed=${(System.currentTimeMillis() - event.startTime) / 1000}s")
         viewModel.startTimer(event.startTime)

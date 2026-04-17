@@ -45,6 +45,17 @@
 
         </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/btn_archive"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/archive_project"
+            android:src="@drawable/ic_archive"
+            android:tint="?attr/colorOnSurfaceVariant"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

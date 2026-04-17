@@ -17,6 +17,115 @@
       }
     },
     "schemas" : {
+      "AdminDataResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/AdminData"
+          }
+        }
+      },
+      "AnalysisDataResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/AnalysisData"
+          }
+        }
+      },
+      "BooleanResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "DoubleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "type" : "number",
+            "format" : "double"
+          }
+        },
+        "required" : [ "payload" ]
+      },
+      "GroupDetailsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/GroupDetails"
+          }
+        }
+      },
+      "GroupResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/Group"
+          }
+        }
+      },
+      "IntegerResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/Role"
+          }
+        }
+      },
+      "RoleResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/Role"
+          }
+        }
+      },
+      "StringResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TrackedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/Tracked"
+          }
+        }
+      },
+      "UserApiTokenResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserApiToken"
+            }
+          }
+        }
+      },
+      "UserDataResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/UserData"
+          }
+        }
+      },
+      "UserProjectsResponse" : {
+        "type" : "object",
+        "properties" : {
+          "payload" : {
+            "$ref" : "#/components/schemas/UserProjects"
+          }
+        }
+      },
       "Group" : {
         "type" : "object",
         "properties" : {
@@ -494,7 +603,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Tracked"
+                  "$ref" : "#/components/schemas/TrackedResponse"
                 }
               }
             }
@@ -521,7 +630,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AdminData"
+                  "$ref" : "#/components/schemas/AdminDataResponse"
                 }
               }
             }
@@ -560,9 +669,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
-                },
-                "example" : "true"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -600,9 +708,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
-                },
-                "example" : "true"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -639,9 +746,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
-                },
-                "example" : "true"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -665,9 +771,9 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "text/plain" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "string"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -705,9 +811,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
-                },
-                "example" : "true"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -744,9 +849,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -772,7 +876,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/UserProjects"
+                  "$ref" : "#/components/schemas/UserProjectsResponse"
                 }
               }
             }
@@ -810,9 +914,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -849,7 +952,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/AnalysisData"
+                  "$ref" : "#/components/schemas/AnalysisDataResponse"
                 }
               }
             }
@@ -888,9 +991,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -928,9 +1030,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -967,9 +1068,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -1032,7 +1132,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Group"
+                  "$ref" : "#/components/schemas/GroupResponse"
                 }
               }
             }
@@ -1070,7 +1170,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1108,7 +1208,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1146,7 +1246,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/GroupDetails"
+                  "$ref" : "#/components/schemas/GroupDetailsResponse"
                 }
               }
             }
@@ -1185,7 +1285,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1223,7 +1323,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1262,7 +1362,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/GroupDetails"
+                  "$ref" : "#/components/schemas/GroupDetailsResponse"
                 }
               }
             }
@@ -1300,7 +1400,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/GroupDetails"
+                  "$ref" : "#/components/schemas/GroupDetailsResponse"
                 }
               }
             }
@@ -1336,9 +1436,9 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "text/plain" : {
+              "application/json" : {
                 "schema" : {
-                  "type" : "string"
+                  "$ref" : "#/components/schemas/StringResponse"
                 },
                 "example" : "Invite sent | User does not exist | Error matching user to Group"
               }
@@ -1377,7 +1477,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1415,7 +1515,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1467,15 +1567,7 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
-              }
-            }
+            "description" : "OK"
           },
           "401" : {
             "description" : "UNAUTHORIZED"
@@ -1505,29 +1597,10 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
-              }
-            }
+            "description" : "OK"
           },
-          "204" : {
-            "description" : "NO_CONTENT"
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":false}"
-              }
-            }
+          "401" : {
+            "description" : "UNAUTHORIZED"
           }
         }
       }
@@ -1551,18 +1624,10 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
-              }
-            }
+            "description" : "OK"
           },
-          "204" : {
-            "description" : "NO_CONTENT"
+          "406" : {
+            "description" : "BAD_REQUEST"
           }
         }
       }
@@ -1585,15 +1650,7 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
-              }
-            }
+            "description" : "OK"
           },
           "404" : {
             "description" : "NOT_FOUND"
@@ -1611,14 +1668,7 @@
         "operationId" : "logout",
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                }
-              }
-            }
+            "description" : "OK"
           }
         }
       }
@@ -1634,8 +1684,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "number",
-                  "format" : "double"
+                  "$ref" : "#/components/schemas/DoubleResponse"
                 }
               }
             }
@@ -1680,7 +1729,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/UserProjects"
+                  "$ref" : "#/components/schemas/UserProjectsResponse"
                 }
               }
             }
@@ -1703,14 +1752,7 @@
         "operationId" : "refresh",
         "responses" : {
           "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                }
-              }
-            }
+            "description" : "OK"
           },
           "401" : {
             "description" : "UNAUTHORIZED"
@@ -1729,7 +1771,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Role"
+                  "$ref" : "#/components/schemas/RoleResponse"
                 }
               }
             }
@@ -1767,9 +1809,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":23}"
+                  "$ref" : "#/components/schemas/IntegerResponse"
+                }
               }
             }
           },
@@ -1809,9 +1850,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -1848,9 +1888,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -1887,9 +1926,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -1926,9 +1964,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":\"Generated-Token\"}"
+                  "$ref" : "#/components/schemas/StringResponse"
+                }
               }
             }
           },
@@ -1957,7 +1994,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/UserData"
+                  "$ref" : "#/components/schemas/UserDataResponse"
                 }
               }
             }
@@ -1987,9 +2024,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":23}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -2030,9 +2066,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -2070,7 +2105,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -2094,7 +2129,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/UserApiToken"
+                  "$ref" : "#/components/schemas/UserApiTokenResponse"
                 }
               }
             }
@@ -2110,7 +2145,7 @@
         } ]
       }
     },
-    "/api/user/stopTracking" : {
+    "/api/user/stop" : {
       "post" : {
         "tags" : [ "User" ],
         "summary" : "Stop Tracking",
@@ -2133,9 +2168,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -2172,9 +2206,8 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
-                },
-                "example" : "{\"payload\":true}"
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
               }
             }
           },
@@ -2200,7 +2233,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Response"
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }

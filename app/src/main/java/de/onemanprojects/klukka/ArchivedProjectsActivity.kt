@@ -13,7 +13,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class ArchivedProjectsActivity : AppCompatActivity() {
 
@@ -39,9 +41,22 @@ class ArchivedProjectsActivity : AppCompatActivity() {
         val progressBar = findViewById<ProgressBar>(R.id.progress_bar_archived)
         val tvEmpty = findViewById<TextView>(R.id.tv_empty_archived)
 
-        adapter = ArchivedProjectAdapter(emptyList()) { project ->
-            viewModel.unarchiveProject(project.id)
-        }
+        adapter = ArchivedProjectAdapter(
+            projects = emptyList(),
+            onUnarchiveClick = { project ->
+                viewModel.unarchiveProject(project.id)
+            },
+            onDeleteClick = { project ->
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.delete_project_confirm_title)
+                    .setMessage(R.string.delete_project_confirm_message)
+                    .setPositiveButton(R.string.delete_project) { _, _ ->
+                        viewModel.deleteProject(project.id)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 

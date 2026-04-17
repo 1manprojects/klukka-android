@@ -94,4 +94,34 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
             }
         }
     }
+
+    fun deleteProject(projectId: Int) {
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+
+        AppLogger.i(TAG, "Deleting project id=$projectId")
+
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                service.deleteProject("Bearer $apiToken", projectId)
+                AppLogger.i(TAG, "Project $projectId deleted, reloading list")
+                loadArchivedProjects()
+            } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error deleting project: ${e.code()}", e)
+                if (e.code() == 401) {
+                    secureStorage.clearToken()
+                    _unauthorized.value = true
+                } else {
+                    _error.value = "Failed to delete project — server error (${e.code()})"
+                }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error deleting project", e)
+                _error.value = "Network error: could not reach the server"
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Error deleting project", e)
+                _error.value = "Failed to delete project"
+            }
+        }
+    }
 }

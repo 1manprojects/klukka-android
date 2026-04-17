@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.model.ProjectSections
 import de.onemanprojects.klukka.model.StartRequest
@@ -36,6 +37,13 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
 
     private val _trackingStarted = MutableLiveData<TrackingStartedEvent?>()
     val trackingStarted: LiveData<TrackingStartedEvent?> = _trackingStarted
+
+    // null = idle, true = success, false = error
+    private val _projectCreated = MutableLiveData<Boolean?>(null)
+    val projectCreated: LiveData<Boolean?> = _projectCreated
+
+    private val _projectArchived = MutableLiveData<Boolean?>(null)
+    val projectArchived: LiveData<Boolean?> = _projectArchived
 
     fun loadProjects() {
         val serverUrl = secureStorage.getServerUrl()
@@ -73,15 +81,23 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun startTracking(project: Project) {
+    fun startTracking(project: Project, currentTrackingId: Int? = null) {
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
-        AppLogger.i(TAG, "Starting tracking for project id=${project.id} title=${project.title}")
+        AppLogger.i(TAG, "Starting tracking for project id=${project.id} title=${project.title}" +
+                (if (currentTrackingId != null) " (stopping current id=$currentTrackingId first)" else ""))
 
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
+
+                if (currentTrackingId != null) {
+                    AppLogger.i(TAG, "Stopping current tracking id=$currentTrackingId")
+                    service.stopTracking("Bearer $apiToken", currentTrackingId)
+                    AppLogger.i(TAG, "Current tracking stopped")
+                }
+
                 val response = service.startTracking(
                     "Bearer $apiToken",
                     StartRequest(project.id, TimeZone.getDefault().id)
@@ -91,7 +107,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 AppLogger.i(TAG, "Tracking started, id=$trackingId")
                 _trackingStarted.value = TrackingStartedEvent(trackingId, project, System.currentTimeMillis())
             } catch (e: HttpException) {
-                AppLogger.e(TAG, "HTTP error starting tracking: ${e.code()}", e)
+                AppLogger.e(TAG, "HTTP error: ${e.code()}", e)
                 if (e.code() == 401) {
                     secureStorage.clearToken()
                     _unauthorized.value = true
@@ -110,5 +126,76 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
 
     fun onTrackingNavigated() {
         _trackingStarted.value = null
+    }
+
+    fun addProject(title: String, description: String, color: String) {
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+        val newProject = Project(
+            id = 0,
+            title = title.trim(),
+            description = description.trim().ifEmpty { null },
+            color = color.trim().ifEmpty { null },
+            trackedThisMonth = 0.0,
+            ref = 0,
+            archived = false
+        )
+        AppLogger.i(TAG, "Creating project: title=${newProject.title}")
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                service.addPersonalProject("Bearer $apiToken", newProject)
+                AppLogger.i(TAG, "Project created")
+                _projectCreated.value = true
+                loadProjects()
+            } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error creating project: ${e.code()}", e)
+                _error.value = "Failed to create project (${e.code()})"
+                _projectCreated.value = false
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error creating project", e)
+                _error.value = "Network error: could not reach the server"
+                _projectCreated.value = false
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Error creating project", e)
+                _error.value = "Failed to create project"
+                _projectCreated.value = false
+            }
+        }
+    }
+
+    fun onProjectCreatedHandled() {
+        _projectCreated.value = null
+    }
+
+    fun archiveProject(project: Project) {
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+        AppLogger.i(TAG, "Archiving project id=${project.id} title=${project.title}")
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                service.archiveProject("Bearer $apiToken", ArchiveRequest(project.id, true))
+                AppLogger.i(TAG, "Project archived")
+                _projectArchived.value = true
+                loadProjects()
+            } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error archiving project: ${e.code()}", e)
+                _error.value = "Failed to archive project (${e.code()})"
+                _projectArchived.value = false
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error archiving project", e)
+                _error.value = "Network error: could not reach the server"
+                _projectArchived.value = false
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Error archiving project", e)
+                _error.value = "Failed to archive project"
+                _projectArchived.value = false
+            }
+        }
+    }
+
+    fun onProjectArchivedHandled() {
+        _projectArchived.value = null
     }
 }

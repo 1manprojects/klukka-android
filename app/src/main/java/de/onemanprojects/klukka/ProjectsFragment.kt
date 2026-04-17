@@ -7,14 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
-import de.onemanprojects.klukka.model.ProjectListItem
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import de.onemanprojects.klukka.model.ProjectListItem
 
 private const val TAG = "ProjectsFragment"
 
@@ -36,14 +37,30 @@ class ProjectsFragment : Fragment() {
         val tvEmpty = view.findViewById<TextView>(R.id.tv_empty)
         val fab = view.findViewById<FloatingActionButton>(R.id.fab_add_project)
 
-        adapter = ProjectAdapter(emptyList()) { project ->
-            AppLogger.i(TAG, "Project tapped: id=${project.id} title=${project.title}")
-            viewModel.startTracking(project)
-        }
+        adapter = ProjectAdapter(
+            items = emptyList(),
+            onProjectClick = { project ->
+                AppLogger.i(TAG, "Project tapped: id=${project.id} title=${project.title}")
+                val currentTrackingId = mainViewModel.activeTracking.value?.trackingId
+                viewModel.startTracking(project, currentTrackingId)
+            },
+            onArchiveClick = { project ->
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.archive_confirm_title)
+                    .setMessage(R.string.archive_confirm_message)
+                    .setPositiveButton(R.string.archive_project) { _, _ ->
+                        viewModel.archiveProject(project)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        )
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 
-        fab.setOnClickListener { /* placeholder */ }
+        fab.setOnClickListener {
+            AddProjectDialogFragment().show(childFragmentManager, "add_project")
+        }
 
         swipeRefresh.setOnRefreshListener {
             AppLogger.d(TAG, "Manual refresh triggered")
@@ -58,11 +75,11 @@ class ProjectsFragment : Fragment() {
             val items = mutableListOf<ProjectListItem>()
             if (sections.own.isNotEmpty()) {
                 items.add(ProjectListItem.Header(getString(R.string.section_own_projects)))
-                sections.own.forEach { items.add(ProjectListItem.Entry(it)) }
+                sections.own.forEach { items.add(ProjectListItem.Entry(it, isOwn = true)) }
             }
             if (sections.group.isNotEmpty()) {
                 items.add(ProjectListItem.Header(getString(R.string.section_group_projects)))
-                sections.group.forEach { items.add(ProjectListItem.Entry(it)) }
+                sections.group.forEach { items.add(ProjectListItem.Entry(it, isOwn = false)) }
             }
             adapter.updateItems(items)
             tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE

@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 
 private const val TAG = "ArchivedFragment"
 
@@ -31,10 +32,24 @@ class ArchivedProjectsFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.rv_archived_projects)
         val tvEmpty = view.findViewById<TextView>(R.id.tv_empty_archived)
 
-        adapter = ArchivedProjectAdapter(emptyList()) { project ->
-            AppLogger.d(TAG, "Unarchive tapped: id=${project.id} title=${project.title}")
-            viewModel.unarchiveProject(project.id)
-        }
+        adapter = ArchivedProjectAdapter(
+            projects = emptyList(),
+            onUnarchiveClick = { project ->
+                AppLogger.d(TAG, "Unarchive tapped: id=${project.id} title=${project.title}")
+                viewModel.unarchiveProject(project.id)
+            },
+            onDeleteClick = { project ->
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.delete_project_confirm_title)
+                    .setMessage(R.string.delete_project_confirm_message)
+                    .setPositiveButton(R.string.delete_project) { _, _ ->
+                        AppLogger.d(TAG, "Delete confirmed: id=${project.id} title=${project.title}")
+                        viewModel.deleteProject(project.id)
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        )
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
 

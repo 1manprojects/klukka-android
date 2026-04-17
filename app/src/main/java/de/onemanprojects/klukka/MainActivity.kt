@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_projects -> showFragment(ProjectsFragment(), TAG_PROJECTS)
+                R.id.nav_calendar -> showFragment(CalendarFragment(), TAG_CALENDAR)
                 R.id.nav_archived -> showFragment(ArchivedProjectsFragment(), TAG_ARCHIVED)
                 R.id.nav_tracking -> {
                     if (mainViewModel.activeTracking.value != null) {
@@ -124,6 +125,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG_PROJECTS = "projects"
+        private const val TAG_CALENDAR = "calendar"
         private const val TAG_ARCHIVED = "archived"
         private const val TAG_TRACKING = "tracking"
     }

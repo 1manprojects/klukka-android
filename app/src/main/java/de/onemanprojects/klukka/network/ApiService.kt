@@ -1,10 +1,15 @@
 package de.onemanprojects.klukka.network
 
+import de.onemanprojects.klukka.model.AnalysisDataResponse
 import de.onemanprojects.klukka.model.ApiResponse
 import de.onemanprojects.klukka.model.ArchiveRequest
+import de.onemanprojects.klukka.model.CommentUpdate
+import de.onemanprojects.klukka.model.DataFilter
+import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.model.ProjectsResponse
 import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.model.TrackedResponse
+import de.onemanprojects.klukka.model.UpdateTrackedRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -23,7 +28,7 @@ interface ApiService {
         @Body start: StartRequest
     ): ApiResponse
 
-    @POST("api/user/stopTracking")
+    @POST("api/user/stop")
     suspend fun stopTracking(
         @Header("Authorization") token: String,
         @Body id: Int
@@ -44,4 +49,40 @@ interface ApiService {
     suspend fun getActiveTracking(
         @Header("Authorization") token: String
     ): TrackedResponse
+
+    @POST("api/comment")
+    suspend fun updateComment(
+        @Header("Authorization") token: String,
+        @Body body: CommentUpdate
+    ): ApiResponse
+
+    @POST("api/data")
+    suspend fun getData(
+        @Header("Authorization") token: String,
+        @Body filter: DataFilter
+    ): AnalysisDataResponse
+
+    @POST("api/update")
+    suspend fun updateTracked(
+        @Header("Authorization") token: String,
+        @Body body: UpdateTrackedRequest
+    ): ApiResponse
+
+    @POST("api/delete")
+    suspend fun deleteTracked(
+        @Header("Authorization") token: String,
+        @Body id: Int
+    ): ApiResponse
+
+    @POST("api/user/addPersonalProject")
+    suspend fun addPersonalProject(
+        @Header("Authorization") token: String,
+        @Body project: Project
+    ): ApiResponse
+
+    @POST("api/deleteProject")
+    suspend fun deleteProject(
+        @Header("Authorization") token: String,
+        @Body projectId: Int
+    ): ApiResponse
 }

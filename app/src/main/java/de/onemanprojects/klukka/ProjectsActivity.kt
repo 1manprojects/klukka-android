@@ -47,9 +47,11 @@ class ProjectsActivity : AppCompatActivity() {
         val tvEmpty = findViewById<TextView>(R.id.tv_empty)
         val fab = findViewById<FloatingActionButton>(R.id.fab_add_project)
 
-        adapter = ProjectAdapter(emptyList()) { project ->
-            viewModel.startTracking(project)
-        }
+        adapter = ProjectAdapter(
+            items = emptyList(),
+            onProjectClick = { project -> viewModel.startTracking(project) },
+            onArchiveClick = { project -> viewModel.archiveProject(project) }
+        )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -65,11 +67,11 @@ class ProjectsActivity : AppCompatActivity() {
             val items = mutableListOf<ProjectListItem>()
             if (sections.own.isNotEmpty()) {
                 items.add(ProjectListItem.Header(getString(R.string.section_own_projects)))
-                sections.own.forEach { items.add(ProjectListItem.Entry(it)) }
+                sections.own.forEach { items.add(ProjectListItem.Entry(it, isOwn = true)) }
             }
             if (sections.group.isNotEmpty()) {
                 items.add(ProjectListItem.Header(getString(R.string.section_group_projects)))
-                sections.group.forEach { items.add(ProjectListItem.Entry(it)) }
+                sections.group.forEach { items.add(ProjectListItem.Entry(it, isOwn = false)) }
             }
             adapter.updateItems(items)
             tvEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE

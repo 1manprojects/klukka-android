@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import de.onemanprojects.klukka.model.Project
@@ -11,7 +12,8 @@ import de.onemanprojects.klukka.model.ProjectListItem
 
 class ProjectAdapter(
     private var items: List<ProjectListItem>,
-    private val onProjectClick: (Project) -> Unit
+    private val onProjectClick: (Project) -> Unit,
+    private val onArchiveClick: (Project) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -22,6 +24,7 @@ class ProjectAdapter(
         val colorAccent: View = itemView.findViewById(R.id.view_color_accent)
         val tvTitle: TextView = itemView.findViewById(R.id.tv_project_title)
         val tvComment: TextView = itemView.findViewById(R.id.tv_project_comment)
+        val btnArchive: ImageButton = itemView.findViewById(R.id.btn_archive)
     }
 
     override fun getItemViewType(position: Int): Int = when (items[position]) {
@@ -57,6 +60,13 @@ class ProjectAdapter(
                         Color.GRAY
                     }
                     colorAccent.setBackgroundColor(color)
+                    if (item.isOwn) {
+                        btnArchive.visibility = View.VISIBLE
+                        btnArchive.setOnClickListener { onArchiveClick(project) }
+                    } else {
+                        btnArchive.visibility = View.GONE
+                        btnArchive.setOnClickListener(null)
+                    }
                 }
             }
         }
