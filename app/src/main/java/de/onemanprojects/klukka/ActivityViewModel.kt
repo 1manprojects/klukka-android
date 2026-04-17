@@ -24,6 +24,9 @@ private const val TAG = "ActivityViewModel"
 
 enum class ActivityPreset { TODAY, WEEK, MONTH, CUSTOM }
 
+/** One coloured segment inside a stacked day-bar. */
+data class ProjectSegment(val colorString: String?, val minutes: Long)
+
 class ActivityViewModel(application: Application) : AndroidViewModel(application) {
 
     private val secureStorage = SecureStorage(application)
@@ -37,8 +40,8 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
     private val _endDate = MutableLiveData<LocalDate>()
     val endDate: LiveData<LocalDate> = _endDate
 
-    private val _barData = MutableLiveData<List<Pair<LocalDate, Long>>>(emptyList())
-    val barData: LiveData<List<Pair<LocalDate, Long>>> = _barData
+    private val _barData = MutableLiveData<List<Pair<LocalDate, List<ProjectSegment>>>>(emptyList())
+    val barData: LiveData<List<Pair<LocalDate, List<ProjectSegment>>>> = _barData
 
     private val _projectTotals = MutableLiveData<List<Pair<Project, Long>>>(emptyList())
     val projectTotals: LiveData<List<Pair<Project, Long>>> = _projectTotals
@@ -137,27 +140,37 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
         val projectsById = allProjects.associateBy { it.id }
         val zoneId = ZoneId.systemDefault()
 
-        val minutesByDate = mutableMapOf<LocalDate, Long>()
-        var d = start
-        while (!d.isAfter(end)) {
-            minutesByDate[d] = 0L
-            d = d.plusDays(1)
-        }
-
+        // date → (projectId → minutes)
+        val minutesByDateByProject = mutableMapOf<LocalDate, MutableMap<Int, Long>>()
         val minutesByProject = mutableMapOf<Int, Long>()
         var totalMins = 0L
+
+        // Initialise every date in range so bars show even on days with no data
+        var d = start
+        while (!d.isAfter(end)) {
+            minutesByDateByProject[d] = mutableMapOf()
+            d = d.plusDays(1)
+        }
 
         for (t in tracked) {
             val startMs = Tracked.parseToEpochMillis(t.start) ?: continue
             val endMs = Tracked.parseToEpochMillis(t.end) ?: continue
             val durationMins = ((endMs - startMs) / 60_000L).coerceAtLeast(0L)
             val date = Instant.ofEpochMilli(startMs).atZone(zoneId).toLocalDate()
-            minutesByDate[date] = (minutesByDate[date] ?: 0L) + durationMins
+            val dayMap = minutesByDateByProject.getOrPut(date) { mutableMapOf() }
+            dayMap[t.projectId] = (dayMap[t.projectId] ?: 0L) + durationMins
             minutesByProject[t.projectId] = (minutesByProject[t.projectId] ?: 0L) + durationMins
             totalMins += durationMins
         }
 
-        _barData.value = minutesByDate.entries.sortedBy { it.key }.map { Pair(it.key, it.value) }
+        _barData.value = minutesByDateByProject.entries.sortedBy { it.key }.map { (date, dayMap) ->
+            val segments = dayMap.entries
+                .sortedByDescending { it.value }
+                .map { (projectId, mins) ->
+                    ProjectSegment(projectsById[projectId]?.color, mins)
+                }
+            Pair(date, segments)
+        }
         _totalMinutes.value = totalMins
         _projectTotals.value = minutesByProject.entries
             .sortedByDescending { it.value }
@@ -167,11 +180,11 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
             }
     }
 
-    private fun buildEmptyBarData(start: LocalDate, end: LocalDate): List<Pair<LocalDate, Long>> {
-        val result = mutableListOf<Pair<LocalDate, Long>>()
+    private fun buildEmptyBarData(start: LocalDate, end: LocalDate): List<Pair<LocalDate, List<ProjectSegment>>> {
+        val result = mutableListOf<Pair<LocalDate, List<ProjectSegment>>>()
         var d = start
         while (!d.isAfter(end)) {
-            result.add(Pair(d, 0L))
+            result.add(Pair(d, emptyList()))
             d = d.plusDays(1)
         }
         return result

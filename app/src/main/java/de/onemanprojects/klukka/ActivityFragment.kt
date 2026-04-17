@@ -89,7 +89,7 @@ class ActivityFragment : Fragment() {
         }
 
         viewModel.barData.observe(viewLifecycleOwner) { data ->
-            val allZero = data.all { it.second == 0L }
+            val allZero = data.all { (_, segs) -> segs.sumOf { it.minutes } == 0L }
             barChart.visibility = if (data.isNotEmpty() && !allZero) View.VISIBLE else View.GONE
             tvNoData.visibility = if (data.isEmpty() || allZero) View.VISIBLE else View.GONE
             barChart.setData(data)

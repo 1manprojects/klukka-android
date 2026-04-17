@@ -26,7 +26,7 @@ class BarChartView @JvmOverloads constructor(
     }
 
     private val d = resources.displayMetrics.density
-    private var barData: List<Pair<LocalDate, Long>> = emptyList()
+    private var barData: List<Pair<LocalDate, List<ProjectSegment>>> = emptyList()
     private val barRect = RectF()
 
     private val colorPrimary: Int
@@ -69,7 +69,7 @@ class BarChartView @JvmOverloads constructor(
         noDataPaint.textAlign = Paint.Align.CENTER
     }
 
-    fun setData(data: List<Pair<LocalDate, Long>>) {
+    fun setData(data: List<Pair<LocalDate, List<ProjectSegment>>>) {
         barData = data
         invalidate()
     }
@@ -95,7 +95,8 @@ class BarChartView @JvmOverloads constructor(
         val chartH = chartBottom - chartTop
         val chartW = chartRight - chartLeft
 
-        val maxMins = barData.maxOf { it.second }.coerceAtLeast(1L)
+        val maxMins = barData.maxOfOrNull { (_, segs) -> segs.sumOf { it.minutes } }
+            ?.coerceAtLeast(1L) ?: 1L
         val maxHours = ((maxMins + 59) / 60).coerceAtLeast(1L)
         val scale = maxHours * 60L // total minutes at top of chart
 
@@ -108,21 +109,31 @@ class BarChartView @JvmOverloads constructor(
             canvas.drawText("${labelHours}h", yLabelW - 4f * d, y + TEXT_DP * d / 2f, yLabelPaint)
         }
 
-        // Bars
+        // Stacked bars — one coloured segment per project per day
         val barCount = barData.size
         val slotW = chartW / barCount
         val padPx = BAR_H_PAD_DP * d
         val cornerPx = CORNER_DP * d
 
         for ((idx, entry) in barData.withIndex()) {
-            val (_, mins) = entry
-            if (mins <= 0L) continue
-            val frac = mins.toFloat() / scale.toFloat()
+            val (_, segments) = entry
+            if (segments.isEmpty()) continue
+            val totalDayMins = segments.sumOf { it.minutes }
+            if (totalDayMins <= 0L) continue
+
             val left = chartLeft + idx * slotW + padPx
             val right = chartLeft + (idx + 1) * slotW - padPx
-            val top = chartBottom - frac * chartH
-            barRect.set(left, top, right, chartBottom)
-            canvas.drawRoundRect(barRect, cornerPx, cornerPx, barPaint)
+            var currentBottom = chartBottom
+
+            for (seg in segments) {
+                val segFrac = seg.minutes.toFloat() / scale.toFloat()
+                val segTop = (currentBottom - segFrac * chartH)
+                    .coerceAtMost(currentBottom)
+                barPaint.color = parseProjectColor(seg.colorString)
+                barRect.set(left, segTop, right, currentBottom)
+                canvas.drawRoundRect(barRect, cornerPx, cornerPx, barPaint)
+                currentBottom = segTop
+            }
         }
 
         // X labels
@@ -130,7 +141,7 @@ class BarChartView @JvmOverloads constructor(
         val lineTwoY = chartBottom + TEXT_DP * d * 2 + 6f * d
 
         for ((idx, entry) in barData.withIndex()) {
-            val (date, _) = entry
+            val (date, _: List<ProjectSegment>) = entry
             val cx = chartLeft + (idx + 0.5f) * slotW
 
             when {
@@ -152,6 +163,11 @@ class BarChartView @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    private fun parseProjectColor(colorStr: String?): Int {
+        if (colorStr.isNullOrBlank()) return colorPrimary
+        return try { Color.parseColor(colorStr) } catch (_: Exception) { colorPrimary }
     }
 
     private fun themeColor(attrName: String, default: Int): Int {
