@@ -54,7 +54,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/unarchive"
             android:src="@drawable/ic_unarchive"
-            android:tint="?attr/colorPrimary" />
+            app:tint="?attr/colorPrimary" />
 
         <ImageButton
             android:id="@+id/btn_delete_project"
@@ -65,7 +65,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/delete_project"
             android:src="@drawable/ic_delete"
-            android:tint="?attr/colorError" />
+            app:tint="?attr/colorError" />
 
     </LinearLayout>
 

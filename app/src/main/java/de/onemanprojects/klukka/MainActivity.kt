@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_projects -> showFragment(ProjectsFragment(), TAG_PROJECTS)
                 R.id.nav_calendar -> showFragment(CalendarFragment(), TAG_CALENDAR)
                 R.id.nav_archived -> showFragment(ArchivedProjectsFragment(), TAG_ARCHIVED)
+                R.id.nav_settings -> showFragment(SettingsFragment(), TAG_SETTINGS)
                 R.id.nav_tracking -> {
                     if (mainViewModel.activeTracking.value != null) {
                         showFragment(ActiveTrackingFragment(), TAG_TRACKING)
@@ -128,5 +129,6 @@ class MainActivity : AppCompatActivity() {
         private const val TAG_CALENDAR = "calendar"
         private const val TAG_ARCHIVED = "archived"
         private const val TAG_TRACKING = "tracking"
+        private const val TAG_SETTINGS = "settings"
     }
 }

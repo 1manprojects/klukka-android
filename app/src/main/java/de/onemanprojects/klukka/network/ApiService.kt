@@ -10,6 +10,7 @@ import de.onemanprojects.klukka.model.ProjectsResponse
 import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.model.TrackedResponse
 import de.onemanprojects.klukka.model.UpdateTrackedRequest
+import de.onemanprojects.klukka.model.UserDataResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -84,5 +85,27 @@ interface ApiService {
     suspend fun deleteProject(
         @Header("Authorization") token: String,
         @Body projectId: Int
+    ): ApiResponse
+
+    @GET("api/user/data")
+    suspend fun getUserData(
+        @Header("Authorization") token: String
+    ): UserDataResponse
+
+    @POST("api/user/deleteToken")
+    suspend fun deleteToken(
+        @Header("Authorization") token: String,
+        @Body tokenId: Int
+    ): ApiResponse
+
+    @POST("api/user/leaveGroup")
+    suspend fun leaveGroup(
+        @Header("Authorization") token: String,
+        @Body groupId: Int
+    ): ApiResponse
+
+    @GET("api/user/delete")
+    suspend fun deleteAccount(
+        @Header("Authorization") token: String
     ): ApiResponse
 }
