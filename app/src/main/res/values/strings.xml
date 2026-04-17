@@ -86,4 +86,15 @@
     <string name="delete_account_message_2">All your tracking data, projects, groups, and account information will be permanently and irreversibly deleted. There is no way to recover this data. Do you want to proceed?</string>
     <string name="delete_account_confirm_btn">Delete My Account</string>
     <string name="tracked_duration_label">Duration:</string>
+    <string name="nav_activity">Activity</string>
+    <string name="activity_preset_today">Today</string>
+    <string name="activity_preset_week">Week</string>
+    <string name="activity_preset_month">Month</string>
+    <string name="activity_date_from">From</string>
+    <string name="activity_date_to">To</string>
+    <string name="activity_total_time">Total Time</string>
+    <string name="activity_total_projects">Projects</string>
+    <string name="activity_no_data">No tracked data for this period</string>
+    <string name="activity_details_section">Details</string>
+    <string name="activity_projects_section">Projects</string>
 </resources>

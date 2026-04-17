@@ -19,6 +19,11 @@
         android:title="@string/nav_calendar" />
 
     <item
+        android:id="@+id/nav_activity"
+        android:icon="@drawable/ic_activity"
+        android:title="@string/nav_activity" />
+
+    <item
         android:id="@+id/nav_archived"
         android:icon="@drawable/ic_archive"
         android:title="@string/title_archived" />
