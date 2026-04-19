@@ -78,6 +78,9 @@
     <string name="leave_group_title">Leave Group</string>
     <string name="leave_group_message">Are you sure you want to leave "%s"? You will lose access to all group projects.</string>
     <string name="leave_group_btn">Leave</string>
+    <string name="logout_btn">Logout</string>
+    <string name="logout_confirm_title">Logout</string>
+    <string name="logout_confirm_message">Are you sure you want to logout?</string>
     <string name="delete_account_btn">Delete Account</string>
     <string name="delete_account_title">Delete Account</string>
     <string name="delete_account_message_1">This will permanently delete your account and all associated data including all tracking entries, projects, and tokens. This cannot be undone.</string>

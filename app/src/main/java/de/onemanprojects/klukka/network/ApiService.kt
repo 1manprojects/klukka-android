@@ -108,4 +108,9 @@ interface ApiService {
     suspend fun deleteAccount(
         @Header("Authorization") token: String
     ): ApiResponse
+
+    @GET("api/logout")
+    suspend fun logout(
+        @Header("Authorization") token: String
+    ): ApiResponse
 }

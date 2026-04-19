@@ -36,11 +36,21 @@ class SettingsFragment : Fragment() {
         val tvNoTokens = view.findViewById<TextView>(R.id.tv_no_tokens)
         val llGroups = view.findViewById<LinearLayout>(R.id.ll_groups)
         val tvNoGroups = view.findViewById<TextView>(R.id.tv_no_groups)
+        val btnLogout = view.findViewById<MaterialButton>(R.id.btn_logout)
         val btnDeleteAccount = view.findViewById<MaterialButton>(R.id.btn_delete_account)
 
         swipeRefresh.setOnRefreshListener {
             AppLogger.d(TAG, "Manual refresh triggered")
             viewModel.loadUserData()
+        }
+
+        btnLogout.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.logout_confirm_title)
+                .setMessage(R.string.logout_confirm_message)
+                .setPositiveButton(R.string.logout_btn) { _, _ -> viewModel.logout() }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
         }
 
         btnDeleteAccount.setOnClickListener {
@@ -73,6 +83,10 @@ class SettingsFragment : Fragment() {
 
         viewModel.accountDeleted.observe(viewLifecycleOwner) { deleted ->
             if (deleted == true) redirectToLogin()
+        }
+
+        viewModel.loggedOut.observe(viewLifecycleOwner) { loggedOut ->
+            if (loggedOut == true) redirectToLogin()
         }
     }
 

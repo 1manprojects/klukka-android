@@ -111,6 +111,16 @@
 
                 <!-- Danger Zone -->
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_logout"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/logout_btn"
+                    xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_delete_account"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
