@@ -121,20 +121,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun logout() {
-        val serverUrl = secureStorage.getServerUrl()
-        val apiToken = secureStorage.getApiToken()
         AppLogger.i(TAG, "Logging out")
-        viewModelScope.launch {
-            try {
-                val service = ApiClient.create(serverUrl)
-                service.logout("Bearer $apiToken")
-            } catch (e: Exception) {
-                AppLogger.w(TAG, "Logout API call failed (${e.message}), clearing credentials anyway")
-            } finally {
-                secureStorage.clearToken()
-                _loggedOut.value = true
-            }
-        }
+        secureStorage.clearToken()
+        _loggedOut.value = true
     }
 
     fun deleteAccount() {
