@@ -123,8 +123,8 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                 val service = ApiClient.create(serverUrl)
                 service.updateTracked("Bearer $apiToken", request)
                 AppLogger.i(TAG, "Updated tracked entry id=${request.id}")
-                _trackedUpdated.value = true
                 updateState()
+                _trackedUpdated.value = true
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error updating tracked entry: ${e.code()}", e)
                 _error.value = "Failed to save changes (${e.code()})"
@@ -157,8 +157,8 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                 val service = ApiClient.create(serverUrl)
                 service.deleteTracked("Bearer $apiToken", id)
                 AppLogger.i(TAG, "Deleted tracked entry id=$id")
-                _trackedDeleted.value = true
                 updateState()
+                _trackedDeleted.value = true
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error deleting tracked entry: ${e.code()}", e)
                 _error.value = "Failed to delete entry (${e.code()})"
