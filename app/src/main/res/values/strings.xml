@@ -97,4 +97,10 @@
     <string name="activity_no_data">No tracked data for this period</string>
     <string name="activity_details_section">Details</string>
     <string name="activity_projects_section">Projects</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_subtitle">Open Source Time Tracking</string>
+    <string name="nav_dark_mode">Dark Mode</string>
+    <string name="nav_github_app">App on GitHub</string>
+    <string name="nav_github_backend">Backend on GitHub</string>
 </resources>

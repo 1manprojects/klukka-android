@@ -12,7 +12,7 @@ You are building a Kotlin Android time tracking app. The Goal is to communicate 
 - Never use absolute paths
 - Prefer incremental changes
 - After each feature, ensure app builds
-- After succesfully implementing a feature and succesfull build commit changes
+- After succesfully implementing a feature and succesfull build commit ALL changes
 
 ## API Integration
 - Use Retrofit interfaces

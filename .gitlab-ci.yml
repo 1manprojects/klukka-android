@@ -1,0 +1,67 @@
+stages:
+  - build
+
+variables:
+  APP_NAME: "Klukka"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=true"
+
+.build_common: &build_common
+  stage: build
+  image: mingc/android-build-box:latest
+  cache:
+    key: "$CI_PROJECT_ID-gradle"
+    paths:
+      - .gradle/
+      - ~/.gradle/caches/
+  before_script:
+    - chmod +x ./gradlew
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        export VERSION="$CI_COMMIT_TAG"
+      else
+        export VERSION="$CI_COMMIT_SHORT_SHA"
+      fi
+    - echo "Building ${APP_NAME} version ${VERSION}"
+    - export VERSION_CODE="${CI_PIPELINE_IID:-1}"
+
+build:unsigned:
+  <<: *build_common
+  script:
+    - ./gradlew assembleRelease
+        -PversionName="${VERSION}"
+        -PversionCode="${VERSION_CODE}"
+    - mkdir -p artifacts
+    - cp app/build/outputs/apk/release/app-release-unsigned.apk
+        "artifacts/${APP_NAME}-${VERSION}.apk"
+  artifacts:
+    name: "${APP_NAME}-${VERSION}"
+    paths:
+      - artifacts/
+    expire_in: 30 days
+  rules:
+    - if: $KEYSTORE_FILE
+      when: never
+    - when: always
+
+build:signed:
+  <<: *build_common
+  script:
+    - echo "${KEYSTORE_FILE}" | base64 -d > /tmp/release.jks
+    - ./gradlew assembleRelease
+        -PversionName="${VERSION}"
+        -PversionCode="${VERSION_CODE}"
+        -Pandroid.injected.signing.store.file=/tmp/release.jks
+        -Pandroid.injected.signing.store.password="${KEYSTORE_STORE_PASSWORD}"
+        -Pandroid.injected.signing.key.alias="${KEYSTORE_KEY_ALIAS}"
+        -Pandroid.injected.signing.key.password="${KEYSTORE_KEY_PASSWORD}"
+    - mkdir -p artifacts
+    - cp app/build/outputs/apk/release/app-release.apk
+        "artifacts/${APP_NAME}-${VERSION}.apk"
+    - rm -f /tmp/release.jks
+  artifacts:
+    name: "${APP_NAME}-${VERSION}"
+    paths:
+      - artifacts/
+    expire_in: 90 days
+  rules:
+    - if: $KEYSTORE_FILE

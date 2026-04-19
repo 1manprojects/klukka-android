@@ -1,23 +1,32 @@
 package de.onemanprojects.klukka
 
 import android.content.Intent
+import android.net.Uri
+import android.widget.CompoundButton
+import androidx.appcompat.app.AppCompatDelegate
+import com.google.android.material.materialswitch.MaterialSwitch
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
-    private lateinit var bottomNav: BottomNavigationView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navView: NavigationView
     private lateinit var appPreferences: AppPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,14 +43,36 @@ class MainActivity : AppCompatActivity() {
         appPreferences = AppPreferences(this)
         AppLogger.isDebugEnabled = appPreferences.isDebugLogging
 
-        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
-        bottomNav = findViewById(R.id.bottom_nav)
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navView = findViewById(R.id.nav_view)
 
-        // Tracking tab starts hidden — only shown when a session is active
-        bottomNav.menu.findItem(R.id.nav_tracking).isVisible = false
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
 
-        bottomNav.setOnItemSelectedListener { item ->
+        // Tracking item starts hidden — only shown when a session is active
+        navView.menu.findItem(R.id.nav_tracking).isVisible = false
+
+        // Dark mode toggle — initialise switch state then react to user changes
+        val darkModeSwitch = navView.menu.findItem(R.id.nav_dark_mode)
+            .actionView?.findViewById<MaterialSwitch>(R.id.switch_dark_mode)
+        darkModeSwitch?.isChecked = appPreferences.isDarkMode
+        darkModeSwitch?.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
+            appPreferences.isDarkMode = isChecked
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+
+        navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_projects -> showFragment(ProjectsFragment(), TAG_PROJECTS)
                 R.id.nav_calendar -> showFragment(CalendarFragment(), TAG_CALENDAR)
@@ -53,30 +84,57 @@ class MainActivity : AppCompatActivity() {
                         showFragment(ActiveTrackingFragment(), TAG_TRACKING)
                     }
                 }
+                R.id.nav_dark_mode -> {
+                    darkModeSwitch?.toggle()
+                    return@setNavigationItemSelectedListener true
+                }
+                R.id.nav_github_app -> {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com")))
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    return@setNavigationItemSelectedListener true
+                }
+                R.id.nav_github_backend -> {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com")))
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                    return@setNavigationItemSelectedListener true
+                }
             }
+            item.isChecked = true
+            drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
 
-        // Show/hide tracking tab and navigate when tracking state changes
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+
+        // Show/hide tracking item and navigate when tracking state changes
         mainViewModel.activeTracking.observe(this) { tracking ->
-            val trackingItem = bottomNav.menu.findItem(R.id.nav_tracking)
+            val trackingItem = navView.menu.findItem(R.id.nav_tracking)
             if (tracking != null) {
                 trackingItem.isVisible = true
             } else {
                 trackingItem.isVisible = false
-                // If currently on tracking tab, navigate back to projects
-                if (bottomNav.selectedItemId == R.id.nav_tracking) {
-                    bottomNav.selectedItemId = R.id.nav_projects
+                // If currently on tracking screen, navigate back to projects
+                if (navView.checkedItem?.itemId == R.id.nav_tracking) {
+                    navView.setCheckedItem(R.id.nav_projects)
+                    showFragment(ProjectsFragment(), TAG_PROJECTS)
                 }
             }
         }
 
-        // One-shot: navigate to the tracking tab when a session starts or is detected on
-        // startup. activeTracking observer already made the tab visible; setting
-        // selectedItemId triggers the nav listener which shows the fragment (once).
+        // One-shot: navigate to the tracking screen when a session starts or is detected on startup.
         mainViewModel.pendingNavToTracking.observe(this) { event ->
             if (event != null) {
-                bottomNav.selectedItemId = R.id.nav_tracking
+                navView.setCheckedItem(R.id.nav_tracking)
+                showFragment(ActiveTrackingFragment(), TAG_TRACKING)
                 mainViewModel.onNavigatedToTracking()
             }
         }
@@ -90,12 +148,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Load initial fragment only on first creation (not on config change).
-        // selectedItemId triggers the listener which calls showFragment — do NOT also
-        // call showFragment directly or two fragment instances will be created and the
-        // first one's coroutine will be cancelled before it finishes.
         if (savedInstanceState == null) {
-            bottomNav.selectedItemId = R.id.nav_projects
+            navView.setCheckedItem(R.id.nav_projects)
+            showFragment(ProjectsFragment(), TAG_PROJECTS)
             mainViewModel.checkActiveTracking()
         }
     }
