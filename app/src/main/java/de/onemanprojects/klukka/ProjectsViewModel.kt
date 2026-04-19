@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import de.onemanprojects.klukka.model.ArchiveRequest
+import de.onemanprojects.klukka.model.NewProjectRequest
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.model.ProjectSections
 import de.onemanprojects.klukka.model.StartRequest
@@ -141,14 +142,10 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
     fun addProject(title: String, description: String, color: String) {
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
-        val newProject = Project(
-            id = 0,
+        val newProject = NewProjectRequest(
             title = title.trim(),
             description = description.trim().ifEmpty { null },
-            color = color.trim().ifEmpty { null },
-            trackedThisMonth = 0.0,
-            ref = 0,
-            archived = false
+            color = color.trim().ifEmpty { null }
         )
         AppLogger.i(TAG, "Creating project: title=${newProject.title}")
         viewModelScope.launch {

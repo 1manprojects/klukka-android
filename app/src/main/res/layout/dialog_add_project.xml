@@ -53,38 +53,29 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Color hex + preview -->
-        <LinearLayout
+        <!-- Color picker -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/project_color_label"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:scrollbars="none">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layout_color"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/ll_color_picker"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:hint="@string/project_color_hint">
+                android:orientation="horizontal"
+                android:paddingVertical="4dp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_color"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:maxLines="1" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <View
-                android:id="@+id/view_color_preview"
-                android:layout_width="36dp"
-                android:layout_height="36dp" />
-
-        </LinearLayout>
+        </HorizontalScrollView>
 
         <!-- Save -->
         <com.google.android.material.button.MaterialButton

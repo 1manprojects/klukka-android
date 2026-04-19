@@ -21,6 +21,7 @@
     <string name="project_title">Title</string>
     <string name="project_description">Description (optional)</string>
     <string name="project_color_hint">Color (e.g. #FF5722)</string>
+    <string name="project_color_label">Color</string>
     <string name="project_title_required">Title is required</string>
     <string name="add_project_create">Create</string>
     <string name="nav_projects">Projects</string>

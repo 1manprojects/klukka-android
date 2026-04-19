@@ -5,6 +5,7 @@ import de.onemanprojects.klukka.model.ApiResponse
 import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.CommentUpdate
 import de.onemanprojects.klukka.model.DataFilter
+import de.onemanprojects.klukka.model.NewProjectRequest
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.model.ProjectsResponse
 import de.onemanprojects.klukka.model.StartRequest
@@ -78,7 +79,7 @@ interface ApiService {
     @POST("api/user/addPersonalProject")
     suspend fun addPersonalProject(
         @Header("Authorization") token: String,
-        @Body project: Project
+        @Body project: NewProjectRequest
     ): ApiResponse
 
     @POST("api/deleteProject")
