@@ -45,6 +45,11 @@
             android:title="@string/nav_settings" />
 
         <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_info"
+            android:title="@string/nav_about" />
+
+        <item
             android:id="@+id/nav_dark_mode"
             android:icon="@drawable/ic_dark_mode"
             android:title="@string/nav_dark_mode"

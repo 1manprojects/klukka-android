@@ -103,4 +103,11 @@
     <string name="nav_dark_mode">Dark Mode</string>
     <string name="nav_github_app">App on GitHub</string>
     <string name="nav_github_backend">Backend on GitHub</string>
+    <string name="nav_about">About</string>
+    <string name="about_version_prefix">Version %1$s</string>
+    <string name="about_links_title">Links</string>
+    <string name="about_github_app_label">App on GitHub</string>
+    <string name="about_github_backend_label">Backend on GitHub</string>
+    <string name="about_deps_title">Open Source Libraries</string>
+    <string name="about_license_title">License</string>
 </resources>

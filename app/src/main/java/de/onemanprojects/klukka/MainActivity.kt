@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_archived -> showFragment(ArchivedProjectsFragment(), TAG_ARCHIVED)
                 R.id.nav_activity -> showFragment(ActivityFragment(), TAG_ACTIVITY)
                 R.id.nav_settings -> showFragment(SettingsFragment(), TAG_SETTINGS)
+                R.id.nav_about -> showFragment(AboutFragment(), TAG_ABOUT)
                 R.id.nav_tracking -> {
                     if (mainViewModel.activeTracking.value != null) {
                         showFragment(ActiveTrackingFragment(), TAG_TRACKING)
@@ -187,5 +188,6 @@ class MainActivity : AppCompatActivity() {
         private const val TAG_TRACKING = "tracking"
         private const val TAG_ACTIVITY = "activity"
         private const val TAG_SETTINGS = "settings"
+        private const val TAG_ABOUT = "about"
     }
 }
