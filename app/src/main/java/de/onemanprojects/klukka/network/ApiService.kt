@@ -77,7 +77,7 @@ interface ApiService {
         @Body id: JsonElement
     ): ApiResponse
 
-    @POST("api/user/addPersonalProject")
+    @POST("api/add")
     suspend fun addPersonalProject(
         @Header("Authorization") token: String,
         @Body project: NewProjectRequest
