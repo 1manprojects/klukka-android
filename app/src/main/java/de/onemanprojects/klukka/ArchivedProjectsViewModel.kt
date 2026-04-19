@@ -42,7 +42,8 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
             try {
                 val service = ApiClient.create(serverUrl)
                 val result = service.getArchivedProjects("Bearer $apiToken")
-                val allProjects = (result.payload?.own ?: emptyList()) + (result.payload?.group ?: emptyList())
+                val allProjects = (result.payload?.own ?: emptyList()).filter { it.archived } +
+                        (result.payload?.group ?: emptyList()).filter { it.archived }
                 AppLogger.i(TAG, "Loaded ${allProjects.size} archived projects")
                 _projects.value = allProjects
             } catch (e: HttpException) {
