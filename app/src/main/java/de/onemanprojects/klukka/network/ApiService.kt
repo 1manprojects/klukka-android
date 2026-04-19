@@ -5,6 +5,7 @@ import de.onemanprojects.klukka.model.ApiResponse
 import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.CommentUpdate
 import de.onemanprojects.klukka.model.DataFilter
+import com.google.gson.JsonElement
 import de.onemanprojects.klukka.model.NewProjectRequest
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.model.ProjectsResponse
@@ -33,7 +34,7 @@ interface ApiService {
     @POST("api/user/stop")
     suspend fun stopTracking(
         @Header("Authorization") token: String,
-        @Body id: Int
+        @Body id: JsonElement
     ): ApiResponse
 
     @GET("api/archived")
@@ -73,7 +74,7 @@ interface ApiService {
     @POST("api/delete")
     suspend fun deleteTracked(
         @Header("Authorization") token: String,
-        @Body id: Int
+        @Body id: JsonElement
     ): ApiResponse
 
     @POST("api/user/addPersonalProject")
@@ -85,7 +86,7 @@ interface ApiService {
     @POST("api/deleteProject")
     suspend fun deleteProject(
         @Header("Authorization") token: String,
-        @Body projectId: Int
+        @Body projectId: JsonElement
     ): ApiResponse
 
     @GET("api/user/data")
@@ -96,13 +97,13 @@ interface ApiService {
     @POST("api/user/deleteToken")
     suspend fun deleteToken(
         @Header("Authorization") token: String,
-        @Body tokenId: Int
+        @Body tokenId: JsonElement
     ): ApiResponse
 
     @POST("api/user/leaveGroup")
     suspend fun leaveGroup(
         @Header("Authorization") token: String,
-        @Body groupId: Int
+        @Body groupId: JsonElement
     ): ApiResponse
 
     @GET("api/user/delete")

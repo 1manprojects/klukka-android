@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.gson.JsonPrimitive
 import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.NewProjectRequest
 import de.onemanprojects.klukka.model.Project
@@ -95,7 +96,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
 
                 if (currentTrackingId != null) {
                     AppLogger.i(TAG, "Stopping current tracking id=$currentTrackingId")
-                    service.stopTracking("Bearer $apiToken", currentTrackingId)
+                    service.stopTracking("Bearer $apiToken", JsonPrimitive(currentTrackingId))
                     AppLogger.i(TAG, "Current tracking stopped")
                 }
 

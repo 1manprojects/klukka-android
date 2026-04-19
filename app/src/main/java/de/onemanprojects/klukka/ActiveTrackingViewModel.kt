@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.gson.JsonPrimitive
 import de.onemanprojects.klukka.model.CommentUpdate
 import de.onemanprojects.klukka.network.ApiClient
 import de.onemanprojects.klukka.network.ApiService
@@ -94,7 +95,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
                 // Flush any unsent comment before stopping
                 flushComment(service, trackingId)
 
-                service.stopTracking("Bearer $apiToken", trackingId)
+                service.stopTracking("Bearer $apiToken", JsonPrimitive(trackingId))
                 AppLogger.i(TAG, "Tracking stopped id=$trackingId")
                 _trackingStopped.value = true
             } catch (e: HttpException) {

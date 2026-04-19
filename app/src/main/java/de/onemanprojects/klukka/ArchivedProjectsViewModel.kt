@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.gson.JsonPrimitive
 import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.network.ApiClient
@@ -105,7 +106,7 @@ class ArchivedProjectsViewModel(application: Application) : AndroidViewModel(app
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-                service.deleteProject("Bearer $apiToken", projectId)
+                service.deleteProject("Bearer $apiToken", JsonPrimitive(projectId))
                 AppLogger.i(TAG, "Project $projectId deleted, reloading list")
                 loadArchivedProjects()
             } catch (e: HttpException) {

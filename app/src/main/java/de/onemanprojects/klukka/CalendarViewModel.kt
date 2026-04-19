@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.gson.JsonPrimitive
 import de.onemanprojects.klukka.model.AnalysisData
 import de.onemanprojects.klukka.model.DataFilter
 import de.onemanprojects.klukka.model.UpdateTrackedRequest
@@ -155,7 +156,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-                service.deleteTracked("Bearer $apiToken", id)
+                service.deleteTracked("Bearer $apiToken", JsonPrimitive(id))
                 AppLogger.i(TAG, "Deleted tracked entry id=$id")
                 updateState()
                 _trackedDeleted.value = true

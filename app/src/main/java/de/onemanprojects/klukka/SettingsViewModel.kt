@@ -3,6 +3,7 @@ package de.onemanprojects.klukka
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import com.google.gson.JsonPrimitive
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import de.onemanprojects.klukka.model.UserData
@@ -73,7 +74,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-                service.deleteToken("Bearer $apiToken", tokenId)
+                service.deleteToken("Bearer $apiToken", JsonPrimitive(tokenId))
                 loadUserData()
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error deleting token: ${e.code()}", e)
@@ -100,7 +101,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-                service.leaveGroup("Bearer $apiToken", groupId)
+                service.leaveGroup("Bearer $apiToken", JsonPrimitive(groupId))
                 loadUserData()
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error leaving group: ${e.code()}", e)
