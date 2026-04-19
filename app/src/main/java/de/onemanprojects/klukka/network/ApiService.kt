@@ -31,7 +31,7 @@ interface ApiService {
         @Body start: StartRequest
     ): ApiResponse
 
-    @POST("api/user/stop")
+    @POST("api/stop")
     suspend fun stopTracking(
         @Header("Authorization") token: String,
         @Body id: JsonElement
