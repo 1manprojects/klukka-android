@@ -102,8 +102,18 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                     "Bearer $apiToken",
                     StartRequest(project.id, TimeZone.getDefault().id)
                 )
-                val trackingId = response.payload?.asInt
-                    ?: throw Exception("Invalid tracking ID in response")
+                val payload = response.payload
+                val trackingId: Int = when {
+                    payload != null && payload.isJsonPrimitive && payload.asJsonPrimitive.isNumber ->
+                        payload.asInt
+                    payload != null && payload.isJsonPrimitive && payload.asJsonPrimitive.isBoolean
+                            && payload.asBoolean -> {
+                        // Group projects return {"payload":true} — fetch the actual tracking ID
+                        val active = service.getActiveTracking("Bearer $apiToken")
+                        active.payload?.id ?: throw Exception("Could not retrieve active tracking ID")
+                    }
+                    else -> throw Exception("Unexpected start tracking response: $payload")
+                }
                 AppLogger.i(TAG, "Tracking started, id=$trackingId")
                 _trackingStarted.value = TrackingStartedEvent(trackingId, project, System.currentTimeMillis())
             } catch (e: HttpException) {
