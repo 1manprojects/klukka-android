@@ -161,6 +161,10 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             navView.setCheckedItem(R.id.nav_projects)
             showFragment(ProjectsFragment(), TAG_PROJECTS)
+        }
+        // Always restore session when ViewModel has no data — covers process death after
+        // extended background where savedInstanceState != null but ViewModel is fresh.
+        if (savedInstanceState == null || mainViewModel.activeTracking.value == null) {
             mainViewModel.checkActiveTracking()
         }
     }
