@@ -1,7 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Dark theme overrides. -->
     <style name="Base.Theme.Klukka" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/glacier_mist</item>
+        <item name="colorOnPrimary">@color/glacier_deep</item>
+        <item name="colorPrimaryContainer">@color/glacier_deep</item>
+        <item name="colorOnPrimaryContainer">@color/glacier_mist</item>
+        <item name="colorSecondary">@color/glacier</item>
+        <item name="colorOnSecondary">@color/glacier_deep</item>
+        <item name="colorSecondaryContainer">@color/glacier_deep</item>
+        <item name="colorOnSecondaryContainer">@color/glacier_mist</item>
+        <item name="colorTertiary">@color/glacier</item>
+        <item name="colorOnTertiary">@color/glacier_deep</item>
     </style>
 </resources>

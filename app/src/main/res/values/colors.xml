@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Klukka glacier palette -->
+    <color name="glacier_deep">#1B2A2D</color>
+    <color name="glacier_mist">#E4EEEF</color>
+    <color name="glacier">#8FA6A8</color>
 </resources>
