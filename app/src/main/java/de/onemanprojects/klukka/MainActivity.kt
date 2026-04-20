@@ -18,6 +18,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
@@ -48,6 +49,14 @@ class MainActivity : AppCompatActivity() {
 
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
+
+        val navHeader = navView.getHeaderView(0)
+        val baseTopPadding = navHeader.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(navHeader) { view, insets ->
+            val statusBarTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.updatePadding(top = statusBarTop + baseTopPadding)
+            insets
+        }
 
         val toggle = ActionBarDrawerToggle(
             this, drawerLayout, toolbar,
