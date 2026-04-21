@@ -27,6 +27,7 @@ import de.onemanprojects.klukka.model.UpdateTrackedRequest
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
@@ -147,15 +148,16 @@ class EditTrackedDialogFragment : BottomSheetDialogFragment() {
             currentProjectId = nonArchivedProjects[position].id
         }
 
-        // Parse existing start/end into LocalDateTime (UTC).
+        // Parse existing start/end into LocalDateTime in the device's local timezone for display.
         // For new entries default to current hour → current hour + 1.
+        val localZone = ZoneId.systemDefault()
         startDateTime = Tracked.parseToEpochMillis(tracked.start)?.let {
-            Instant.ofEpochMilli(it).atOffset(ZoneOffset.UTC).toLocalDateTime()
+            Instant.ofEpochMilli(it).atZone(localZone).toLocalDateTime()
         } ?: if (isNewEntry) {
-            LocalDateTime.now(ZoneOffset.UTC).withMinute(0).withSecond(0).withNano(0)
+            LocalDateTime.now(localZone).withMinute(0).withSecond(0).withNano(0)
         } else null
         endDateTime = Tracked.parseToEpochMillis(tracked.end)?.let {
-            Instant.ofEpochMilli(it).atOffset(ZoneOffset.UTC).toLocalDateTime()
+            Instant.ofEpochMilli(it).atZone(localZone).toLocalDateTime()
         } ?: if (isNewEntry) startDateTime?.plusHours(1) else null
 
         fun updateDurationDisplay() {
@@ -203,26 +205,26 @@ class EditTrackedDialogFragment : BottomSheetDialogFragment() {
         } else {
             // Date/time picker listeners
             etStartDate.setOnClickListener {
-                showDatePicker(startDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()) { date ->
+                showDatePicker(startDateTime?.atZone(localZone)?.toInstant()?.toEpochMilli()) { date ->
                     startDateTime = startDateTime?.withYearMonthDay(date) ?: date.atStartOfDay()
                     updateStartDisplay()
                 }
             }
             etStartTime.setOnClickListener {
                 showTimePicker(startDateTime?.hour ?: 0, startDateTime?.minute ?: 0) { h, m ->
-                    startDateTime = (startDateTime ?: LocalDateTime.now()).withHour(h).withMinute(m).withSecond(0)
+                    startDateTime = (startDateTime ?: LocalDateTime.now(localZone)).withHour(h).withMinute(m).withSecond(0)
                     updateStartDisplay()
                 }
             }
             etEndDate.setOnClickListener {
-                showDatePicker(endDateTime?.toInstant(ZoneOffset.UTC)?.toEpochMilli()) { date ->
+                showDatePicker(endDateTime?.atZone(localZone)?.toInstant()?.toEpochMilli()) { date ->
                     endDateTime = endDateTime?.withYearMonthDay(date) ?: date.atStartOfDay()
                     updateEndDisplay()
                 }
             }
             etEndTime.setOnClickListener {
                 showTimePicker(endDateTime?.hour ?: 0, endDateTime?.minute ?: 0) { h, m ->
-                    endDateTime = (endDateTime ?: LocalDateTime.now()).withHour(h).withMinute(m).withSecond(0)
+                    endDateTime = (endDateTime ?: LocalDateTime.now(localZone)).withHour(h).withMinute(m).withSecond(0)
                     updateEndDisplay()
                 }
             }
@@ -232,8 +234,8 @@ class EditTrackedDialogFragment : BottomSheetDialogFragment() {
                     id = tracked.id,
                     projectId = currentProjectId,
                     active = tracked.active,
-                    start = startDateTime?.atOffset(ZoneOffset.UTC)?.format(serverFmt),
-                    end = endDateTime?.atOffset(ZoneOffset.UTC)?.format(serverFmt),
+                    start = startDateTime?.atZone(localZone)?.withZoneSameInstant(ZoneOffset.UTC)?.format(serverFmt),
+                    end = endDateTime?.atZone(localZone)?.withZoneSameInstant(ZoneOffset.UTC)?.format(serverFmt),
                     timezone = tracked.timezone,
                     comment = etComment.text?.toString()
                 )
