@@ -77,6 +77,7 @@ class CalendarGridView @JvmOverloads constructor(
     private val timeLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val eventFillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val eventTextPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val activeStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val currentLinePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val currentDotPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
@@ -144,6 +145,10 @@ class CalendarGridView @JvmOverloads constructor(
             color = Color.WHITE
             textSize = TEXT_EVENT_DP * d
         }
+        activeStrokePaint.apply {
+            style = Paint.Style.STROKE
+            strokeWidth = 2f * d
+        }
         currentLinePaint.apply {
             color = colorError
             strokeWidth = 2f * d
@@ -157,6 +162,26 @@ class CalendarGridView @JvmOverloads constructor(
 
     // ── Public API ───────────────────────────────────────────────────────────
 
+    // Redraws every minute while at least one active event is visible so the block stretches.
+    private val activeInvalidateRunnable = object : Runnable {
+        override fun run() {
+            if (trackedItems.any { it.active }) {
+                invalidate()
+                postDelayed(this, 60_000L)
+            }
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (trackedItems.any { it.active }) postDelayed(activeInvalidateRunnable, 60_000L)
+    }
+
+    override fun onDetachedFromWindow() {
+        removeCallbacks(activeInvalidateRunnable)
+        super.onDetachedFromWindow()
+    }
+
     fun setDays(days: List<LocalDate>) {
         this.days = days
         invalidate()
@@ -165,6 +190,8 @@ class CalendarGridView @JvmOverloads constructor(
     fun setData(tracked: List<Tracked>, projects: List<Project>) {
         this.trackedItems = tracked
         this.projectsById = projects.associateBy { it.id }
+        removeCallbacks(activeInvalidateRunnable)
+        if (tracked.any { it.active }) postDelayed(activeInvalidateRunnable, 60_000L)
         invalidate()
     }
 
@@ -222,7 +249,9 @@ class CalendarGridView @JvmOverloads constructor(
 
             for (tracked in trackedItems) {
                 val startMs = Tracked.parseToEpochMillis(tracked.start) ?: continue
-                val endMs = Tracked.parseToEpochMillis(tracked.end) ?: (startMs + 15 * 60_000L)
+                val isActive = tracked.active
+                val endMs = if (isActive) System.currentTimeMillis()
+                            else Tracked.parseToEpochMillis(tracked.end) ?: (startMs + 15 * 60_000L)
                 if (endMs <= dayStartMs || startMs >= dayEndMs) continue
 
                 val clampedStart = startMs.coerceIn(dayStartMs, dayEndMs)
@@ -239,6 +268,13 @@ class CalendarGridView @JvmOverloads constructor(
 
                 eventRect.set(colLeft, top, colRight, bottom)
                 canvas.drawRoundRect(eventRect, cornerRadiusPx, cornerRadiusPx, eventFillPaint)
+
+                // Active entries get a contrasting border so they stand out at a glance.
+                if (isActive) {
+                    activeStrokePaint.color = contrastColor(color)
+                    canvas.drawRoundRect(eventRect, cornerRadiusPx, cornerRadiusPx, activeStrokePaint)
+                }
+
                 eventHitAreas.add(Pair(RectF(eventRect), tracked))
 
                 // Text content — only drawn when the block is tall enough
@@ -247,8 +283,9 @@ class CalendarGridView @JvmOverloads constructor(
                     val textX = colLeft + 4f * d
                     val lineH = (TEXT_EVENT_DP + 2f) * d
 
-                    // Line 1: project title
-                    val title = project?.title ?: "#${tracked.projectId}"
+                    // Line 1: project title, prefixed with a recording dot for active entries
+                    val rawTitle = project?.title ?: "#${tracked.projectId}"
+                    val title = if (isActive) "● $rawTitle" else rawTitle
                     canvas.drawText(title, textX, top + lineH, eventTextPaint)
 
                     // Line 2: duration in h / m

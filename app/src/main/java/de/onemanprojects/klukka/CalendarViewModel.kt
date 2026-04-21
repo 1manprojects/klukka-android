@@ -197,8 +197,24 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     "Bearer $apiToken",
                     DataFilter(startStr, endStr, null)
                 )
-                AppLogger.i(TAG, "Loaded calendar data: ${response.payload?.tracked?.size ?: 0} entries")
-                _data.value = response.payload
+
+                // Merge the currently active tracking entry so it always shows in the calendar,
+                // even when the server's getData response omits open-ended entries.
+                val activeEntry = try {
+                    service.getActiveTracking("Bearer $apiToken").payload
+                } catch (_: Exception) { null }
+
+                val trackedList = response.payload?.tracked?.toMutableList() ?: mutableListOf()
+                if (activeEntry != null) {
+                    trackedList.removeAll { it.id == activeEntry.id }
+                    trackedList.add(activeEntry)
+                }
+
+                AppLogger.i(TAG, "Loaded calendar data: ${trackedList.size} entries (active=${activeEntry != null})")
+                _data.value = response.payload?.copy(tracked = trackedList)
+                    ?: if (activeEntry != null)
+                        de.onemanprojects.klukka.model.AnalysisData(null, null, listOf(activeEntry))
+                    else null
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error loading calendar data: ${e.code()}", e)
                 _error.value = "Failed to load calendar data (${e.code()})"

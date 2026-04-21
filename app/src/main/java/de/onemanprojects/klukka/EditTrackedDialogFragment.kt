@@ -113,7 +113,7 @@ class EditTrackedDialogFragment : BottomSheetDialogFragment() {
 
         currentProjectId = tracked.projectId
 
-        val isNewEntry = tracked.id == 0
+        val isNewEntry = tracked.id == -1
 
         val tvTitle = view.findViewById<TextView>(R.id.tv_dialog_title)
         val cardArchivedNotice = view.findViewById<MaterialCardView>(R.id.card_archived_notice)
