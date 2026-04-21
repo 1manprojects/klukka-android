@@ -80,7 +80,7 @@ class CalendarFragment : Fragment() {
             val allProjects = (analysisData?.projects ?: emptyList()) +
                     (analysisData?.groupProjects ?: emptyList())
             val template = Tracked(
-                id = 0,
+                id = -1,
                 projectId = allProjects.firstOrNull { !it.archived }?.id ?: 0,
                 active = false,
                 start = null,
