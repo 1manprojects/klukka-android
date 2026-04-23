@@ -18,11 +18,20 @@ variables:
     - |
       if [ -n "$CI_COMMIT_TAG" ]; then
         export VERSION="$CI_COMMIT_TAG"
+        export PACKAGE_NAME="${APP_NAME}"
       else
         export VERSION="$CI_COMMIT_SHORT_SHA"
+        export PACKAGE_NAME="${APP_NAME}-DEV"
       fi
     - echo "Building ${APP_NAME} version ${VERSION}"
     - export VERSION_CODE="${CI_PIPELINE_IID:-1}"
+
+.publish_apk: &publish_apk
+  - |
+    curl --fail \
+      --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+      --upload-file "${APK_PATH}" \
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${VERSION}/${APK_FILENAME}"
 
 build:unsigned:
   <<: *build_common
@@ -30,14 +39,9 @@ build:unsigned:
     - ./gradlew assembleRelease
         -PversionName="${VERSION}"
         -PversionCode="${VERSION_CODE}"
-    - mkdir -p artifacts
-    - cp app/build/outputs/apk/release/app-release-unsigned.apk
-        "artifacts/${APP_NAME}-${VERSION}.apk"
-  artifacts:
-    name: "${APP_NAME}-${VERSION}"
-    paths:
-      - artifacts/
-    expire_in: 30 days
+    - export APK_PATH="app/build/outputs/apk/release/app-release-unsigned.apk"
+    - export APK_FILENAME="${PACKAGE_NAME}-${VERSION}-unsigned.apk"
+    - *publish_apk
   rules:
     - if: $KEYSTORE_FILE
       when: never
@@ -54,14 +58,14 @@ build:signed:
         -Pandroid.injected.signing.store.password="${KEYSTORE_STORE_PASSWORD}"
         -Pandroid.injected.signing.key.alias="${KEYSTORE_KEY_ALIAS}"
         -Pandroid.injected.signing.key.password="${KEYSTORE_KEY_PASSWORD}"
-    - mkdir -p artifacts
-    - cp app/build/outputs/apk/release/app-release.apk
-        "artifacts/${APP_NAME}-${VERSION}.apk"
     - rm -f /tmp/release.jks
-  artifacts:
-    name: "${APP_NAME}-${VERSION}"
-    paths:
-      - artifacts/
-    expire_in: 90 days
+    # Publish signed APK
+    - export APK_PATH="app/build/outputs/apk/release/app-release.apk"
+    - export APK_FILENAME="${PACKAGE_NAME}-${VERSION}.apk"
+    - *publish_apk
+    # Publish unsigned APK alongside signed
+    - export APK_PATH="app/build/outputs/apk/release/app-release-unsigned.apk"
+    - export APK_FILENAME="${PACKAGE_NAME}-${VERSION}-unsigned.apk"
+    - *publish_apk
   rules:
     - if: $KEYSTORE_FILE
