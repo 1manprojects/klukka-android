@@ -3,9 +3,6 @@ package de.onemanprojects.klukka
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -148,25 +145,6 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null || mainViewModel.activeTracking.value == null) {
             mainViewModel.checkActiveTracking()
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        menu.findItem(R.id.action_debug_logging).isChecked = AppLogger.isDebugEnabled
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_debug_logging) {
-            val newState = !item.isChecked
-            item.isChecked = newState
-            AppLogger.isDebugEnabled = newState
-            appPreferences.isDebugLogging = newState
-            val msg = if (newState) getString(R.string.debug_on) else getString(R.string.debug_off)
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun showFragment(fragment: Fragment, tag: String) {
