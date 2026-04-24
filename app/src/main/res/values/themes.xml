@@ -14,4 +14,11 @@
     </style>
 
     <style name="Theme.Klukka" parent="Base.Theme.Klukka" />
+
+    <style name="Widget.Klukka.Button.Action" parent="Widget.Material3.Button">
+        <item name="strokeWidth">2dp</item>
+        <item name="strokeColor">?attr/colorOnPrimary</item>
+        <item name="android:elevation">8dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
 </resources>

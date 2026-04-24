@@ -83,6 +83,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
+        style="@style/Widget.Klukka.Button.Action"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

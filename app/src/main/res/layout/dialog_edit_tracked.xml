@@ -190,6 +190,7 @@
         <!-- Save -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
+            style="@style/Widget.Klukka.Button.Action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/edit_tracked_save" />
