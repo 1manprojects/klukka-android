@@ -12,8 +12,11 @@
     <string name="no_archived_projects">No archived projects</string>
     <string name="unarchive">Unarchive</string>
     <string name="delete_project">Delete project</string>
-    <string name="delete_project_confirm_title">Delete Project</string>
-    <string name="delete_project_confirm_message">This will permanently delete the project and ALL tracking data associated with it. This cannot be undone. Are you sure?</string>
+    <string name="delete_project_confirm_title">Delete Project?</string>
+    <string name="delete_project_confirm_message">This will permanently delete the project and ALL tracking data associated with it. This cannot be undone.</string>
+    <string name="delete_project_confirm2_title">Are you absolutely sure?</string>
+    <string name="delete_project_confirm2_message">All tracking history for this project will be lost forever. There is no way to recover this data.</string>
+    <string name="delete_project_confirm2_btn">Yes, delete everything</string>
     <string name="archive_project">Archive project</string>
     <string name="archive_confirm_title">Archive Project</string>
     <string name="archive_confirm_message">Archive this project? It will no longer appear in the active list but can be restored from the Archived screen.</string>
