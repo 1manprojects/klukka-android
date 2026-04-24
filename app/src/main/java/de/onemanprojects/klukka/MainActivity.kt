@@ -2,9 +2,6 @@ package de.onemanprojects.klukka
 
 import android.content.Intent
 import android.net.Uri
-import android.widget.CompoundButton
-import androidx.appcompat.app.AppCompatDelegate
-import com.google.android.material.materialswitch.MaterialSwitch
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -69,18 +66,6 @@ class MainActivity : AppCompatActivity() {
         // Tracking item starts hidden — only shown when a session is active
         navView.menu.findItem(R.id.nav_tracking).isVisible = false
 
-        // Dark mode toggle — initialise switch state then react to user changes
-        val darkModeSwitch = navView.menu.findItem(R.id.nav_dark_mode)
-            .actionView?.findViewById<MaterialSwitch>(R.id.switch_dark_mode)
-        darkModeSwitch?.isChecked = appPreferences.isDarkMode
-        darkModeSwitch?.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
-            appPreferences.isDarkMode = isChecked
-            AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
-        }
-
         navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_projects -> showFragment(ProjectsFragment(), TAG_PROJECTS)
@@ -93,10 +78,6 @@ class MainActivity : AppCompatActivity() {
                     if (mainViewModel.activeTracking.value != null) {
                         showFragment(ActiveTrackingFragment(), TAG_TRACKING)
                     }
-                }
-                R.id.nav_dark_mode -> {
-                    darkModeSwitch?.toggle()
-                    return@setNavigationItemSelectedListener true
                 }
                 R.id.nav_github_app -> {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com")))

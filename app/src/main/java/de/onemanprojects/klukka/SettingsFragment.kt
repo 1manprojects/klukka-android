@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import de.onemanprojects.klukka.model.Group
@@ -38,6 +40,34 @@ class SettingsFragment : Fragment() {
         val tvNoGroups = view.findViewById<TextView>(R.id.tv_no_groups)
         val btnLogout = view.findViewById<MaterialButton>(R.id.btn_logout)
         val btnDeleteAccount = view.findViewById<MaterialButton>(R.id.btn_delete_account)
+        val toggleTheme = view.findViewById<MaterialButtonToggleGroup>(R.id.toggle_theme)
+
+        val appPreferences = AppPreferences(requireContext())
+        val initialButton = when (appPreferences.themeMode) {
+            AppPreferences.THEME_LIGHT -> R.id.btn_theme_light
+            AppPreferences.THEME_DARK -> R.id.btn_theme_dark
+            else -> R.id.btn_theme_system
+        }
+        toggleTheme.check(initialButton)
+
+        toggleTheme.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val mode = when (checkedId) {
+                R.id.btn_theme_light -> {
+                    appPreferences.themeMode = AppPreferences.THEME_LIGHT
+                    AppCompatDelegate.MODE_NIGHT_NO
+                }
+                R.id.btn_theme_dark -> {
+                    appPreferences.themeMode = AppPreferences.THEME_DARK
+                    AppCompatDelegate.MODE_NIGHT_YES
+                }
+                else -> {
+                    appPreferences.themeMode = AppPreferences.THEME_SYSTEM
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                }
+            }
+            AppCompatDelegate.setDefaultNightMode(mode)
+        }
 
         swipeRefresh.setOnRefreshListener {
             AppLogger.d(TAG, "Manual refresh triggered")

@@ -8,8 +8,11 @@ class KlukkaApplication : Application() {
         super.onCreate()
         val prefs = AppPreferences(this)
         AppCompatDelegate.setDefaultNightMode(
-            if (prefs.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
+            when (prefs.themeMode) {
+                AppPreferences.THEME_DARK -> AppCompatDelegate.MODE_NIGHT_YES
+                AppPreferences.THEME_LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
         )
     }
 }

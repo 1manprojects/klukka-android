@@ -105,6 +105,10 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_subtitle">Open Source Time Tracking</string>
     <string name="nav_dark_mode">Dark Mode</string>
+    <string name="settings_appearance_section">Appearance</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">Follow System</string>
     <string name="nav_github_app">App on GitHub</string>
     <string name="nav_github_backend">Backend on GitHub</string>
     <string name="nav_about">About</string>
