@@ -99,6 +99,10 @@
     <string name="activity_total_time">Total Time</string>
     <string name="activity_total_projects">Projects</string>
     <string name="activity_no_data">No tracked data for this period</string>
+    <string name="activity_export_section">Export</string>
+    <string name="activity_export_detailed">Detailed export</string>
+    <string name="activity_export_btn">Download CSV</string>
+    <string name="activity_export_success">CSV saved successfully</string>
     <string name="activity_details_section">Details</string>
     <string name="activity_projects_section">Projects</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

@@ -5,6 +5,7 @@ import de.onemanprojects.klukka.model.ApiResponse
 import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.CommentUpdate
 import de.onemanprojects.klukka.model.DataFilter
+import de.onemanprojects.klukka.model.ExportFilter
 import com.google.gson.JsonElement
 import de.onemanprojects.klukka.model.NewProjectRequest
 import de.onemanprojects.klukka.model.Project
@@ -13,10 +14,12 @@ import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.model.TrackedResponse
 import de.onemanprojects.klukka.model.UpdateTrackedRequest
 import de.onemanprojects.klukka.model.UserDataResponse
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Streaming
 
 interface ApiService {
 
@@ -110,5 +113,12 @@ interface ApiService {
     suspend fun deleteAccount(
         @Header("Authorization") token: String
     ): ApiResponse
+
+    @Streaming
+    @POST("api/export")
+    suspend fun exportCsv(
+        @Header("Authorization") token: String,
+        @Body filter: ExportFilter
+    ): ResponseBody
 
 }

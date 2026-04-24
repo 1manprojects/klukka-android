@@ -3,18 +3,23 @@ package de.onemanprojects.klukka
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import java.io.IOException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -26,6 +31,22 @@ class ActivityFragment : Fragment() {
 
     private val viewModel: ActivityViewModel by viewModels()
     private val dateDisplayFmt = DateTimeFormatter.ofPattern("dd MMM yyyy")
+
+    private var pendingCsvBytes: ByteArray? = null
+
+    private val createCsvDocument = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri: Uri? ->
+        val bytes = pendingCsvBytes ?: return@registerForActivityResult
+        pendingCsvBytes = null
+        if (uri == null) return@registerForActivityResult
+        try {
+            requireContext().contentResolver.openOutputStream(uri)?.use { it.write(bytes) }
+            Snackbar.make(requireView(), R.string.activity_export_success, Snackbar.LENGTH_SHORT).show()
+        } catch (e: IOException) {
+            Snackbar.make(requireView(), "Failed to save file", Snackbar.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -43,6 +64,9 @@ class ActivityFragment : Fragment() {
         val tvTotalTime = view.findViewById<TextView>(R.id.tv_total_time)
         val tvProjectCount = view.findViewById<TextView>(R.id.tv_project_count)
         val llProjects = view.findViewById<LinearLayout>(R.id.ll_projects)
+        val switchDetailed = view.findViewById<MaterialSwitch>(R.id.switch_export_detailed)
+        val btnExport = view.findViewById<MaterialButton>(R.id.btn_export_csv)
+        val progressExport = view.findViewById<LinearProgressIndicator>(R.id.progress_export)
 
         // Pre-select Week to match ViewModel default
         togglePreset.check(R.id.btn_preset_week)
@@ -110,6 +134,28 @@ class ActivityFragment : Fragment() {
 
         viewModel.unauthorized.observe(viewLifecycleOwner) { unauthorized ->
             if (unauthorized == true) redirectToLogin()
+        }
+
+        btnExport.setOnClickListener {
+            viewModel.exportCsv(switchDetailed.isChecked)
+        }
+
+        viewModel.exportLoading.observe(viewLifecycleOwner) { isLoading ->
+            progressExport.visibility = if (isLoading) View.VISIBLE else View.GONE
+            btnExport.isEnabled = !isLoading
+        }
+
+        viewModel.exportBytes.observe(viewLifecycleOwner) { bytes ->
+            if (bytes == null) return@observe
+            viewModel.clearExportBytes()
+            pendingCsvBytes = bytes
+            val start = viewModel.startDate.value?.toString() ?: "export"
+            val end = viewModel.endDate.value?.toString() ?: ""
+            createCsvDocument.launch("klukka_${start}_${end}.csv")
+        }
+
+        viewModel.exportError.observe(viewLifecycleOwner) { error ->
+            if (error != null) Snackbar.make(requireView(), error, Snackbar.LENGTH_LONG).show()
         }
     }
 

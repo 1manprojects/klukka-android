@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import de.onemanprojects.klukka.model.AnalysisData
 import de.onemanprojects.klukka.model.DataFilter
+import de.onemanprojects.klukka.model.ExportFilter
 import de.onemanprojects.klukka.model.Project
 import de.onemanprojects.klukka.model.Tracked
 import de.onemanprojects.klukka.network.ApiClient
@@ -57,6 +58,15 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
 
     private val _unauthorized = MutableLiveData<Boolean>()
     val unauthorized: LiveData<Boolean> = _unauthorized
+
+    private val _exportBytes = MutableLiveData<ByteArray?>()
+    val exportBytes: LiveData<ByteArray?> = _exportBytes
+
+    private val _exportLoading = MutableLiveData(false)
+    val exportLoading: LiveData<Boolean> = _exportLoading
+
+    private val _exportError = MutableLiveData<String?>()
+    val exportError: LiveData<String?> = _exportError
 
     init {
         selectPreset(ActivityPreset.WEEK)
@@ -125,6 +135,52 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
                 _loading.value = false
             }
         }
+    }
+
+    fun exportCsv(detailed: Boolean) {
+        val start = _startDate.value ?: return
+        val end = _endDate.value ?: return
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+        AppLogger.i(TAG, "Exporting CSV $start – $end, detailed=$detailed")
+        _exportLoading.value = true
+        _exportError.value = null
+        _exportBytes.value = null
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                val fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                val startStr = start.atStartOfDay().atOffset(ZoneOffset.UTC).format(fmt)
+                val endStr = end.atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(fmt)
+                val filter = ExportFilter(
+                    filter = DataFilter(startStr, endStr, null),
+                    detailed = detailed,
+                    groupId = null
+                )
+                val body = service.exportCsv("Bearer $apiToken", filter)
+                _exportBytes.value = body.bytes()
+            } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error exporting CSV: ${e.code()}", e)
+                if (e.code() == 401) {
+                    secureStorage.clearToken()
+                    _unauthorized.value = true
+                } else {
+                    _exportError.value = "Export failed (${e.code()})"
+                }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error exporting CSV", e)
+                _exportError.value = "Network error: could not reach the server"
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Error exporting CSV", e)
+                _exportError.value = "Export failed"
+            } finally {
+                _exportLoading.value = false
+            }
+        }
+    }
+
+    fun clearExportBytes() {
+        _exportBytes.value = null
     }
 
     private fun processData(data: AnalysisData?, start: LocalDate, end: LocalDate) {
