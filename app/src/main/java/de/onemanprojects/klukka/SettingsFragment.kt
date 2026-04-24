@@ -195,7 +195,7 @@ class SettingsFragment : Fragment() {
             .setMessage(getString(R.string.leave_group_message, group.title ?: ""))
             .setPositiveButton(R.string.leave_group_btn) { _, _ ->
                 AppLogger.d(TAG, "Leave group confirmed: id=${group.id}")
-                viewModel.leaveGroup(group.id)
+                viewModel.leaveGroup(group)
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()

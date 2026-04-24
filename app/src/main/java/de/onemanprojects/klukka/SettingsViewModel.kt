@@ -94,14 +94,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun leaveGroup(groupId: Int) {
+    fun leaveGroup(group: de.onemanprojects.klukka.model.Group) {
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
-        AppLogger.i(TAG, "Leaving group id=$groupId")
+        AppLogger.i(TAG, "Leaving group id=${group.id}")
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-                service.leaveGroup("Bearer $apiToken", JsonPrimitive(groupId))
+                service.leaveGroup("Bearer $apiToken", group)
                 loadUserData()
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error leaving group: ${e.code()}", e)

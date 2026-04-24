@@ -106,7 +106,7 @@ interface ApiService {
     @POST("api/user/leaveGroup")
     suspend fun leaveGroup(
         @Header("Authorization") token: String,
-        @Body groupId: JsonElement
+        @Body group: de.onemanprojects.klukka.model.Group
     ): ApiResponse
 
     @GET("api/user/delete")
