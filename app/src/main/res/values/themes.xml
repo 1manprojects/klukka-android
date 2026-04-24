@@ -16,8 +16,11 @@
     <style name="Theme.Klukka" parent="Base.Theme.Klukka" />
 
     <style name="Widget.Klukka.Button.Action" parent="Widget.Material3.Button">
+        <item name="backgroundTint">?attr/colorPrimaryContainer</item>
+        <item name="android:textColor">?attr/colorOnPrimaryContainer</item>
+        <item name="iconTint">?attr/colorOnPrimaryContainer</item>
         <item name="strokeWidth">2dp</item>
-        <item name="strokeColor">?attr/colorOnPrimary</item>
+        <item name="strokeColor">?attr/colorOnPrimaryContainer</item>
         <item name="android:elevation">8dp</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
