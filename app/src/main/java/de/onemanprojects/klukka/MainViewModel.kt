@@ -68,6 +68,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private val _trackingRefreshing = MutableLiveData(false)
+    val trackingRefreshing: LiveData<Boolean> = _trackingRefreshing
+
+    /** Re-fetches the active tracking start time from the server and updates the timer.
+     *  Does not trigger navigation — safe to call while already on the tracking screen. */
+    fun refreshActiveTracking() {
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+        if (serverUrl.isEmpty() || apiToken.isEmpty()) return
+        _trackingRefreshing.value = true
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                val trackedResponse = service.getActiveTracking("Bearer $apiToken")
+                val tracked = trackedResponse.payload
+                if (tracked != null && tracked.active) {
+                    val startMillis = Tracked.parseToEpochMillis(tracked.start) ?: return@launch
+                    val current = _activeTracking.value ?: return@launch
+                    _activeTracking.value = current.copy(startTime = startMillis, comment = tracked.comment ?: current.comment)
+                }
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "Refresh active tracking failed: ${e.message}")
+            } finally {
+                _trackingRefreshing.value = false
+            }
+        }
+    }
+
     /** Called by ProjectsFragment when a tracking session starts. */
     fun onTrackingStarted(event: TrackingStartedEvent) {
         AppLogger.d(TAG, "Tracking started: id=${event.trackingId} project=${event.project.title}")

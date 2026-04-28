@@ -8,13 +8,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.google.android.material.textfield.TextInputEditText
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 
 class ActiveTrackingFragment : Fragment() {
 
@@ -31,6 +32,7 @@ class ActiveTrackingFragment : Fragment() {
         val event = mainViewModel.activeTracking.value
         if (event == null) return
 
+        val swipeRefresh = view.findViewById<SwipeRefreshLayout>(R.id.swipe_refresh_tracking)
         val tvTitle = view.findViewById<TextView>(R.id.tv_tracking_title)
         val tvComment = view.findViewById<TextView>(R.id.tv_tracking_comment)
         val tvElapsed = view.findViewById<TextView>(R.id.tv_elapsed_time)
@@ -63,6 +65,21 @@ class ActiveTrackingFragment : Fragment() {
             val s = seconds % 60
             tvElapsed.text = String.format("%02d:%02d:%02d", h, m, s)
             progressSeconds.setProgressCompat((seconds % 60).toInt(), true)
+        }
+
+        // When a pull-to-refresh fetches a corrected start time from the server, restart the timer.
+        mainViewModel.activeTracking.observe(viewLifecycleOwner) { updated ->
+            if (updated != null && updated.startTime != event.startTime) {
+                viewModel.startTimer(updated.startTime)
+            }
+        }
+
+        swipeRefresh.setOnRefreshListener {
+            mainViewModel.refreshActiveTracking()
+        }
+
+        mainViewModel.trackingRefreshing.observe(viewLifecycleOwner) { refreshing ->
+            swipeRefresh.isRefreshing = refreshing == true
         }
 
         btnStop.setOnClickListener {

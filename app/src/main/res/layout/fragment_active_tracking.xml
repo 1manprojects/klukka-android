@@ -1,108 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_tracking_root"
+    android:id="@+id/swipe_refresh_tracking"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_tracking_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="32dp"
-        android:gravity="center"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="My Project" />
-
-    <TextView
-        android:id="@+id/tv_tracking_comment"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_tracking_title"
-        tools:text="A short description" />
-
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progress_seconds"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:max="60"
-        android:progress="0"
-        app:indicatorColor="?attr/colorPrimary"
-        app:indicatorSize="240dp"
-        app:layout_constraintBottom_toTopOf="@id/til_comment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_tracking_comment"
-        app:trackColor="?attr/colorSurfaceVariant"
-        app:trackCornerRadius="4dp"
-        app:trackThickness="10dp" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="@id/progress_seconds"
-        app:layout_constraintEnd_toEndOf="@id/progress_seconds"
-        app:layout_constraintStart_toStartOf="@id/progress_seconds"
-        app:layout_constraintTop_toTopOf="@id/progress_seconds">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_tracking_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/tv_elapsed_time"
+            android:id="@+id/tv_tracking_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="My Project" />
+
+        <TextView
+            android:id="@+id/tv_tracking_comment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_tracking_title"
+            tools:text="A short description" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_seconds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:text="00:00:00"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium" />
+            android:max="60"
+            android:progress="0"
+            app:indicatorColor="?attr/colorPrimary"
+            app:indicatorSize="240dp"
+            app:layout_constraintBottom_toTopOf="@id/til_comment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_tracking_comment"
+            app:trackColor="?attr/colorSurfaceVariant"
+            app:trackCornerRadius="4dp"
+            app:trackThickness="10dp" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_stop"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:contentDescription="@string/stop_tracking"
-            android:src="@drawable/ic_stop"
-            app:backgroundTint="?attr/colorError"
-            app:fabSize="normal" />
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@id/progress_seconds"
+            app:layout_constraintEnd_toEndOf="@id/progress_seconds"
+            app:layout_constraintStart_toStartOf="@id/progress_seconds"
+            app:layout_constraintTop_toTopOf="@id/progress_seconds">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_elapsed_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="00:00:00"
+                android:textAppearance="?attr/textAppearanceHeadlineMedium" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_comment"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp"
-        android:hint="@string/comment_label"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btn_stop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:contentDescription="@string/stop_tracking"
+                android:src="@drawable/ic_stop"
+                app:backgroundTint="?attr/colorError"
+                app:fabSize="normal" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_comment"
-            android:layout_width="match_parent"
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_comment"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="top|start"
-            android:hint="@string/comment_placeholder"
-            android:inputType="textMultiLine"
-            android:lines="3"
-            android:maxLines="5"
-            android:minLines="3"
-            android:scrollbars="vertical" />
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="24dp"
+            android:hint="@string/comment_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_comment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top|start"
+                android:hint="@string/comment_placeholder"
+                android:inputType="textMultiLine"
+                android:lines="3"
+                android:maxLines="5"
+                android:minLines="3"
+                android:scrollbars="vertical" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

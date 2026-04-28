@@ -5,10 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -29,15 +30,18 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val swipeRefresh = view.findViewById<SwipeRefreshLayout>(R.id.swipe_refresh_calendar)
         val tvTitle = view.findViewById<TextView>(R.id.tv_calendar_title)
         val btnPrev = view.findViewById<ImageButton>(R.id.btn_prev)
         val btnNext = view.findViewById<ImageButton>(R.id.btn_next)
         val btnToday = view.findViewById<MaterialButton>(R.id.btn_today)
         val toggleGroup = view.findViewById<MaterialButtonToggleGroup>(R.id.toggle_view_type)
         val calendarGrid = view.findViewById<CalendarGridView>(R.id.calendar_grid)
-        val scrollView = view.findViewById<ScrollView>(R.id.scroll_calendar)
+        val scrollView = view.findViewById<NestedScrollView>(R.id.scroll_calendar)
         val progressBar = view.findViewById<LinearProgressIndicator>(R.id.progress_loading)
         val fabAdd = view.findViewById<FloatingActionButton>(R.id.fab_add)
+
+        swipeRefresh.setOnRefreshListener { viewModel.reload() }
 
         // Pre-select Week to match ViewModel default
         toggleGroup.check(R.id.btn_week)
@@ -94,6 +98,7 @@ class CalendarFragment : Fragment() {
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
             progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            swipeRefresh.isRefreshing = isLoading
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->

@@ -79,6 +79,10 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         updateState()
     }
 
+    fun reload() {
+        updateState()
+    }
+
     private fun stepPeriod(): Period = when (viewType) {
         CalendarViewType.DAY -> Period.ofDays(1)
         CalendarViewType.WEEK, CalendarViewType.WORK_WEEK -> Period.ofWeeks(1)

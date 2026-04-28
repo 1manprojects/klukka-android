@@ -6,126 +6,133 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_calendar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <!-- Today button row -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_today"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="4dp"
-            android:minWidth="0dp"
-            android:paddingHorizontal="8dp"
-            android:text="@string/calendar_today" />
-
-        <!-- Navigation row: prev · title · next -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="4dp"
-            android:paddingBottom="2dp"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/btn_prev"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/calendar_prev"
-                android:src="@drawable/ic_chevron_left" />
-
-            <TextView
-                android:id="@+id/tv_calendar_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                tools:text="Mon 14 Apr – Sun 20 Apr 2025" />
-
-            <ImageButton
-                android:id="@+id/btn_next"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/calendar_next"
-                android:src="@drawable/ic_chevron_right" />
-
-        </LinearLayout>
-
-        <!-- View-type toggle: Day / Week / Work Week -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:paddingBottom="6dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggle_view_type"
+            <!-- Today button row -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_today"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleSelection="true"
-                app:selectionRequired="true">
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp"
+                android:text="@string/calendar_today" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_day"
-                    style="?attr/materialButtonOutlinedStyle"
+            <!-- Navigation row: prev · title · next -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="4dp"
+                android:paddingBottom="2dp"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btn_prev"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/calendar_prev"
+                    android:src="@drawable/ic_chevron_left" />
+
+                <TextView
+                    android:id="@+id/tv_calendar_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceTitleSmall"
+                    tools:text="Mon 14 Apr – Sun 20 Apr 2025" />
+
+                <ImageButton
+                    android:id="@+id/btn_next"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/calendar_next"
+                    android:src="@drawable/ic_chevron_right" />
+
+            </LinearLayout>
+
+            <!-- View-type toggle: Day / Week / Work Week -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingBottom="6dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/toggle_view_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/calendar_view_day" />
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_week"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/calendar_view_week" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_day"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/calendar_view_day" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_work_week"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/calendar_view_work_week" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_week"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/calendar_view_week" />
 
-            </com.google.android.material.button.MaterialButtonToggleGroup>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_work_week"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/calendar_view_work_week" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            </LinearLayout>
+
+            <!-- Loading indicator (hidden when idle) -->
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress_loading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:trackCornerRadius="0dp" />
+
+            <!-- Scrollable calendar grid -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/scroll_calendar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scrollbars="vertical">
+
+                <de.onemanprojects.klukka.CalendarGridView
+                    android:id="@+id/calendar_grid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
 
-        <!-- Loading indicator (hidden when idle) -->
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/progress_loading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone"
-            app:trackCornerRadius="0dp" />
-
-        <!-- Scrollable calendar grid -->
-        <ScrollView
-            android:id="@+id/scroll_calendar"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:scrollbars="vertical">
-
-            <de.onemanprojects.klukka.CalendarGridView
-                android:id="@+id/calendar_grid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </ScrollView>
-
-    </LinearLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
