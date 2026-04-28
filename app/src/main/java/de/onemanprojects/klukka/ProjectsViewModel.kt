@@ -1,6 +1,8 @@
 package de.onemanprojects.klukka
 
 import android.app.Application
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +26,7 @@ data class TrackingStartedEvent(val trackingId: Int, val project: Project, val s
 class ProjectsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val secureStorage = SecureStorage(application)
+    private val offlineCache = OfflineCache(application)
 
     private val _projects = MutableLiveData<ProjectSections>()
     val projects: LiveData<ProjectSections> = _projects
@@ -40,7 +43,6 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
     private val _trackingStarted = MutableLiveData<TrackingStartedEvent?>()
     val trackingStarted: LiveData<TrackingStartedEvent?> = _trackingStarted
 
-    // null = idle, true = success, false = error
     private val _projectCreated = MutableLiveData<Boolean?>(null)
     val projectCreated: LiveData<Boolean?> = _projectCreated
 
@@ -61,8 +63,10 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 val result = service.getProjects("Bearer $apiToken")
                 val own = result.payload?.own ?: emptyList()
                 val group = result.payload?.group ?: emptyList()
+                val sections = ProjectSections(own, group)
+                offlineCache.cacheProjects(sections)
                 AppLogger.i(TAG, "Loaded projects (own=${own.size}, group=${group.size})")
-                _projects.value = ProjectSections(own, group)
+                _projects.value = sections
             } catch (e: HttpException) {
                 AppLogger.e(TAG, "HTTP error loading projects: ${e.code()}", e)
                 if (e.code() == 401) {
@@ -73,7 +77,13 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 }
             } catch (e: IOException) {
                 AppLogger.e(TAG, "Network error loading projects", e)
-                _error.value = "Network error: could not reach the server"
+                val cached = offlineCache.getCachedProjects()
+                if (cached != null) {
+                    AppLogger.i(TAG, "Serving cached projects (own=${cached.own.size}, group=${cached.group.size})")
+                    _projects.value = cached
+                } else {
+                    _error.value = "Network error: could not reach the server"
+                }
             } catch (e: Exception) {
                 AppLogger.e(TAG, "Error loading projects", e)
                 _error.value = "Failed to load projects"
@@ -84,6 +94,19 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun startTracking(project: Project, currentTrackingId: Int? = null) {
+        if (!isOnline()) {
+            if (currentTrackingId != null) {
+                _error.value = "Cannot switch projects while offline"
+                return
+            }
+            val startTimeMs = System.currentTimeMillis()
+            val timezone = TimeZone.getDefault().id
+            offlineCache.addPendingAction(PendingTrackingAction.OfflineStart(project, startTimeMs, timezone, ""))
+            AppLogger.i(TAG, "Offline: queued start tracking for project id=${project.id} title=${project.title}")
+            _trackingStarted.value = TrackingStartedEvent(-1, project, startTimeMs)
+            return
+        }
+
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
 
@@ -110,7 +133,6 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                         payload.asInt
                     payload != null && payload.isJsonPrimitive && payload.asJsonPrimitive.isBoolean
                             && payload.asBoolean -> {
-                        // Group projects return {"payload":true} — fetch the actual tracking ID
                         val active = service.getActiveTracking("Bearer $apiToken")
                         active.payload?.id ?: throw Exception("Could not retrieve active tracking ID")
                     }
@@ -205,5 +227,12 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
 
     fun onProjectArchivedHandled() {
         _projectArchived.value = null
+    }
+
+    private fun isOnline(): Boolean {
+        val cm = getApplication<Application>().getSystemService(ConnectivityManager::class.java)
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }

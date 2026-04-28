@@ -1,6 +1,8 @@
 package de.onemanprojects.klukka
 
 import android.app.Application
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,6 +23,7 @@ private const val COMMENT_DEBOUNCE_MS = 1000L
 class ActiveTrackingViewModel(application: Application) : AndroidViewModel(application) {
 
     private val secureStorage = SecureStorage(application)
+    private val offlineCache = OfflineCache(application)
 
     private val _elapsedSeconds = MutableLiveData(0L)
     val elapsedSeconds: LiveData<Long> = _elapsedSeconds
@@ -37,7 +40,6 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
     private var timerJob: Job? = null
     private var commentDebounceJob: Job? = null
 
-    // Holds the latest comment text that has not yet been sent to the server
     private var pendingComment: String? = null
 
     fun startTimer(startTime: Long) {
@@ -54,9 +56,13 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    /** Called whenever the comment field changes. Resets the debounce timer. */
     fun onCommentChanged(trackingId: Int, comment: String) {
         pendingComment = comment
+        if (trackingId == -1) {
+            // Offline session: persist comment to cache only
+            offlineCache.updatePendingComment(comment)
+            return
+        }
         commentDebounceJob?.cancel()
         commentDebounceJob = viewModelScope.launch {
             delay(COMMENT_DEBOUNCE_MS)
@@ -65,8 +71,8 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    /** Sends a pending comment update if one exists. No-op if nothing is pending. */
     private suspend fun flushComment(service: ApiService, trackingId: Int) {
+        if (trackingId == -1) return
         val comment = pendingComment ?: return
         pendingComment = null
         val apiToken = secureStorage.getApiToken()
@@ -75,15 +81,35 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
             AppLogger.i(TAG, "Comment updated for tracking id=$trackingId")
         } catch (e: Exception) {
             AppLogger.w(TAG, "Failed to update comment: ${e.message}")
-            // Restore so a subsequent stop can retry
             if (pendingComment == null) pendingComment = comment
         }
     }
 
-    fun stopTracking(trackingId: Int) {
+    fun stopTracking(trackingId: Int, projectId: Int) {
         AppLogger.i(TAG, "Stopping tracking id=$trackingId")
         timerJob?.cancel()
         commentDebounceJob?.cancel()
+
+        val endTimeMs = System.currentTimeMillis()
+        val finalComment = pendingComment ?: ""
+
+        if (trackingId == -1) {
+            // Session was started offline — convert OfflineStart to OfflineStartAndStop in cache
+            offlineCache.convertOfflineStartToStartStop(endTimeMs, finalComment)
+            AppLogger.i(TAG, "Offline: queued stop for offline session")
+            _trackingStopped.value = true
+            return
+        }
+
+        if (!isOnline()) {
+            // Online session but currently offline — queue the stop for later
+            offlineCache.addPendingAction(
+                PendingTrackingAction.OnlineStop(trackingId, projectId, endTimeMs, finalComment)
+            )
+            AppLogger.i(TAG, "Offline: queued stop for online tracking id=$trackingId")
+            _trackingStopped.value = true
+            return
+        }
 
         val serverUrl = secureStorage.getServerUrl()
         val apiToken = secureStorage.getApiToken()
@@ -91,10 +117,7 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             try {
                 val service = ApiClient.create(serverUrl)
-
-                // Flush any unsent comment before stopping
                 flushComment(service, trackingId)
-
                 service.stopTracking("Bearer $apiToken", JsonPrimitive(trackingId))
                 AppLogger.i(TAG, "Tracking stopped id=$trackingId")
                 _trackingStopped.value = true
@@ -108,15 +131,24 @@ class ActiveTrackingViewModel(application: Application) : AndroidViewModel(appli
                     startTimer(System.currentTimeMillis() - (_elapsedSeconds.value ?: 0L) * 1000L)
                 }
             } catch (e: IOException) {
-                AppLogger.e(TAG, "Network error stopping tracking", e)
-                _error.value = "Network error: could not reach the server"
-                startTimer(System.currentTimeMillis() - (_elapsedSeconds.value ?: 0L) * 1000L)
+                AppLogger.e(TAG, "Network error stopping tracking — queuing offline stop", e)
+                offlineCache.addPendingAction(
+                    PendingTrackingAction.OnlineStop(trackingId, projectId, endTimeMs, finalComment)
+                )
+                _trackingStopped.value = true
             } catch (e: Exception) {
                 AppLogger.e(TAG, "Error stopping tracking", e)
                 _error.value = "Failed to stop tracking"
                 startTimer(System.currentTimeMillis() - (_elapsedSeconds.value ?: 0L) * 1000L)
             }
         }
+    }
+
+    private fun isOnline(): Boolean {
+        val cm = getApplication<Application>().getSystemService(ConnectivityManager::class.java)
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     override fun onCleared() {

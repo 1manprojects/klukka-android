@@ -21,6 +21,9 @@ class ActiveTrackingFragment : Fragment() {
     private val viewModel: ActiveTrackingViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
 
+    // Kept as var so the offline→online sync can update the tracking ID transparently
+    private var currentEvent: TrackingStartedEvent? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_active_tracking, container, false)
@@ -28,8 +31,8 @@ class ActiveTrackingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val event = mainViewModel.activeTracking.value
-        if (event == null) return
+        currentEvent = mainViewModel.activeTracking.value
+        val initialEvent = currentEvent ?: return
 
         val tvTitle = view.findViewById<TextView>(R.id.tv_tracking_title)
         val tvComment = view.findViewById<TextView>(R.id.tv_tracking_comment)
@@ -38,23 +41,28 @@ class ActiveTrackingFragment : Fragment() {
         val btnStop = view.findViewById<FloatingActionButton>(R.id.btn_stop)
         val etComment = view.findViewById<TextInputEditText>(R.id.et_comment)
 
-        tvTitle.text = event.project.title ?: ""
-        tvComment.text = event.project.description ?: ""
-        if (event.comment.isNotBlank()) {
-            etComment.setText(event.comment)
+        tvTitle.text = initialEvent.project.title ?: ""
+        tvComment.text = initialEvent.project.description ?: ""
+        if (initialEvent.comment.isNotBlank()) {
+            etComment.setText(initialEvent.comment)
         }
 
-        // Add TextWatcher after setting initial text to avoid a spurious debounce trigger
+        // When offline→online sync assigns a real tracking ID, update currentEvent so
+        // stop and comment operations use the correct server ID.
+        mainViewModel.activeTracking.observe(viewLifecycleOwner) { event ->
+            if (event != null) currentEvent = event
+        }
+
         etComment.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                viewModel.onCommentChanged(event.trackingId, s?.toString() ?: "")
+                viewModel.onCommentChanged(currentEvent?.trackingId ?: -1, s?.toString() ?: "")
             }
         })
 
-        AppLogger.i("ActiveTrackingFragment", "onViewCreated: event.startTime=${event.startTime} now=${System.currentTimeMillis()} expectedElapsed=${(System.currentTimeMillis() - event.startTime) / 1000}s")
-        viewModel.startTimer(event.startTime)
+        AppLogger.i("ActiveTrackingFragment", "onViewCreated: event.startTime=${initialEvent.startTime} now=${System.currentTimeMillis()} expectedElapsed=${(System.currentTimeMillis() - initialEvent.startTime) / 1000}s")
+        viewModel.startTimer(initialEvent.startTime)
 
         viewModel.elapsedSeconds.observe(viewLifecycleOwner) { seconds ->
             AppLogger.i("ActiveTrackingFragment", "elapsedSeconds observer: seconds=$seconds")
@@ -66,7 +74,8 @@ class ActiveTrackingFragment : Fragment() {
         }
 
         btnStop.setOnClickListener {
-            viewModel.stopTracking(event.trackingId)
+            val e = currentEvent ?: return@setOnClickListener
+            viewModel.stopTracking(e.trackingId, e.project.id)
         }
 
         viewModel.trackingStopped.observe(viewLifecycleOwner) { stopped ->
