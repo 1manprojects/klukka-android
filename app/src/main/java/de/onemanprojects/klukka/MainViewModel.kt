@@ -14,7 +14,10 @@ import de.onemanprojects.klukka.model.Tracked
 import de.onemanprojects.klukka.model.UpdateTrackedRequest
 import de.onemanprojects.klukka.network.ApiClient
 import de.onemanprojects.klukka.network.ApiService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
 import java.time.Instant
 import java.time.ZoneOffset
@@ -23,12 +26,16 @@ import java.util.TimeZone
 
 private const val TAG = "MainViewModel"
 private val SERVER_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+private const val SYNC_RETRY_MS = 30_000L
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val secureStorage = SecureStorage(application)
     private val offlineCache = OfflineCache(application)
     private val connectivityMonitor = ConnectivityMonitor(application)
+
+    // Prevents concurrent sync runs (connectivity callbacks fire multiple times on reconnect)
+    private val syncMutex = Mutex()
 
     val isOnline: LiveData<Boolean> = connectivityMonitor.isOnline
 
@@ -41,14 +48,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _unauthorized = MutableLiveData(false)
     val unauthorized: LiveData<Boolean> = _unauthorized
 
-    private var wasOffline = !connectivityMonitor.checkNow()
-
     init {
+        // Attempt sync every time connectivity reports online. This covers:
+        //   - clean offline → online transitions (wifi toggle)
+        //   - initial startup when there are actions from a previous session
+        // The mutex ensures only one sync runs at a time even if the callback fires repeatedly.
         connectivityMonitor.isOnline.observeForever { online ->
-            if (online && wasOffline) {
-                viewModelScope.launch { syncAllPendingActions() }
+            if (online) {
+                viewModelScope.launch { syncPendingActions() }
             }
-            wasOffline = !online
+        }
+
+        // Periodic fallback: if the server was temporarily unreachable while wifi stayed
+        // connected there is no network state-change event, so the observer above never fires.
+        // Every 30 seconds we retry so the queue drains without user interaction.
+        viewModelScope.launch {
+            while (true) {
+                delay(SYNC_RETRY_MS)
+                if (connectivityMonitor.checkNow()) {
+                    syncPendingActions()
+                }
+            }
         }
     }
 
@@ -60,7 +80,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         AppLogger.d(TAG, "Checking for active tracking session")
         viewModelScope.launch {
             if (!connectivityMonitor.checkNow()) {
-                // Offline: restore active session from cache if one exists
+                // Offline: restore an active offline session from cache if one exists
                 val activeStart = offlineCache.getActiveOfflineStart()
                 if (activeStart != null) {
                     AppLogger.i(TAG, "Offline: restoring offline tracking session from cache")
@@ -71,24 +91,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 return@launch
             }
 
-            // Online: sync any pending actions first (e.g. OnlineStop still showing active on server)
-            val pending = offlineCache.getPendingActions()
-            if (pending.isNotEmpty()) {
-                AppLogger.i(TAG, "Online on startup with ${pending.size} pending action(s) — syncing first")
-                for (action in offlineCache.getPendingActions().toList()) {
-                    try {
-                        doSyncAction(action)
-                        offlineCache.removeFirstPendingAction()
-                    } catch (e: Exception) {
-                        AppLogger.e(TAG, "Startup sync failed: ${e.message}", e)
-                        break
-                    }
-                    if (action is PendingTrackingAction.OfflineStart) {
-                        // Active tracking already set by doSyncAction — skip server check
-                        return@launch
-                    }
-                }
-            }
+            // Wait for any in-progress sync to finish before reading server state.
+            // This matters for OnlineStop: the server still shows the session as active
+            // until the stop request is sent, so we must sync first.
+            syncMutex.withLock { }
 
             try {
                 val service = ApiClient.create(serverUrl)
@@ -120,17 +126,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun syncAllPendingActions() {
-        val pending = offlineCache.getPendingActions()
-        if (pending.isEmpty()) return
-        AppLogger.i(TAG, "Back online — syncing ${pending.size} pending action(s)")
-        for (action in offlineCache.getPendingActions().toList()) {
-            try {
-                doSyncAction(action)
-                offlineCache.removeFirstPendingAction()
-            } catch (e: Exception) {
-                AppLogger.e(TAG, "Sync failed: ${e.message}", e)
-                break
+    private suspend fun syncPendingActions() {
+        syncMutex.withLock {
+            val actions = offlineCache.getPendingActions()
+            if (actions.isEmpty()) return@withLock
+            AppLogger.i(TAG, "Syncing ${actions.size} pending action(s)")
+            for (action in actions) {
+                try {
+                    doSyncAction(action)
+                    offlineCache.removeFirstPendingAction()
+                    AppLogger.i(TAG, "Synced and removed: ${action::class.simpleName}")
+                } catch (e: Exception) {
+                    AppLogger.e(TAG, "Sync failed for ${action::class.simpleName}: ${e.message}", e)
+                    break // Retry on the next connectivity event or periodic tick
+                }
             }
         }
     }
