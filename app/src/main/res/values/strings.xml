@@ -125,6 +125,4 @@
     <string name="about_github_backend_label">Backend on GitHub</string>
     <string name="about_deps_title">Open Source Libraries</string>
     <string name="about_license_title">License</string>
-    <string name="offline_banner">You are offline — showing cached data. Tracking is available offline.</string>
-    <string name="offline_no_switch_project">Cannot switch projects while offline</string>
 </resources>

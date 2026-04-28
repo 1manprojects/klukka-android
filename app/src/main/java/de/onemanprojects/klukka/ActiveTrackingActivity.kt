@@ -60,7 +60,7 @@ class ActiveTrackingActivity : AppCompatActivity() {
 
         btnStop.setOnClickListener {
             if (trackingId != -1) {
-                viewModel.stopTracking(trackingId, 0)
+                viewModel.stopTracking(trackingId)
             }
         }
 
