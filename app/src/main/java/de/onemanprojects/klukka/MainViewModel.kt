@@ -51,6 +51,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val event = TrackingStartedEvent(tracked.id, project, startMillis, tracked.comment ?: "")
                     _activeTracking.value = event
                     _pendingNavToTracking.value = event
+                    scheduleNotificationAlarms(event)
                 } else {
                     AppLogger.i(TAG, "No active tracking session")
                 }
@@ -101,6 +102,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         AppLogger.d(TAG, "Tracking started: id=${event.trackingId} project=${event.project.title}")
         _activeTracking.value = event
         _pendingNavToTracking.value = event
+        scheduleNotificationAlarms(event)
     }
 
     /** Called by MainActivity after it has handled the navigation event. */
@@ -112,5 +114,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun onTrackingStopped() {
         AppLogger.d(TAG, "Tracking stopped")
         _activeTracking.value = null
+        val ctx = getApplication<Application>()
+        val prefs = AppPreferences(ctx)
+        prefs.activeTrackingStartTime = 0L
+        prefs.activeTrackingProjectName = ""
+        TrackingAlarmScheduler.cancelAll(ctx)
+    }
+
+    private fun scheduleNotificationAlarms(event: TrackingStartedEvent) {
+        val ctx = getApplication<Application>()
+        val prefs = AppPreferences(ctx)
+        val projectName = event.project.title ?: ""
+        prefs.activeTrackingStartTime = event.startTime
+        prefs.activeTrackingProjectName = projectName
+        if (!prefs.notificationsEnabled) return
+        TrackingAlarmScheduler.cancelAll(ctx)
+        if (prefs.durationAlertEnabled) {
+            TrackingAlarmScheduler.scheduleDurationAlarm(ctx, event.startTime, prefs.durationAlertHours)
+        }
+        if (prefs.timeAlertEnabled) {
+            TrackingAlarmScheduler.scheduleTimeAlarm(ctx, prefs.timeAlertHour, prefs.timeAlertMinute)
+        }
     }
 }

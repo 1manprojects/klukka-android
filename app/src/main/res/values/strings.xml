@@ -125,4 +125,19 @@
     <string name="about_github_backend_label">Backend on GitHub</string>
     <string name="about_deps_title">Open Source Libraries</string>
     <string name="about_license_title">License</string>
+
+    <!-- Notifications settings -->
+    <string name="settings_notifications_section">Notifications</string>
+    <string name="notif_enable_label">Enable notifications</string>
+    <string name="notif_duration_label">Alert after tracking exceeds duration</string>
+    <string name="notif_duration_hours_hint">Hours (e.g. 8)</string>
+    <string name="notif_time_label">Alert if still tracking past time</string>
+    <string name="notif_time_hint">Time (tap to pick)</string>
+    <string name="notif_channel_name">Tracking Alerts</string>
+    <string name="notif_channel_description">Alerts when active tracking exceeds configured limits</string>
+    <string name="notif_duration_title">Tracking running long</string>
+    <string name="notif_duration_text">"%1$s" has been tracked for over %2$d hour(s)</string>
+    <string name="notif_time_title">Tracking still active</string>
+    <string name="notif_time_text">"%1$s" is still being tracked (past %2$s)</string>
+    <string name="notif_permission_required">Notification permission is required. Please grant it in system settings.</string>
 </resources>

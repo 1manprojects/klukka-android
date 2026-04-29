@@ -1,21 +1,32 @@
 package de.onemanprojects.klukka
 
+import android.Manifest
+import android.app.TimePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import de.onemanprojects.klukka.model.Group
 import de.onemanprojects.klukka.model.UserApiToken
 
@@ -24,6 +35,15 @@ private const val TAG = "SettingsFragment"
 class SettingsFragment : Fragment() {
 
     private val viewModel: SettingsViewModel by viewModels()
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) {
+            Snackbar.make(requireView(), R.string.notif_permission_required, Snackbar.LENGTH_LONG).show()
+            view?.findViewById<MaterialSwitch>(R.id.switch_notifications_enabled)?.isChecked = false
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -43,6 +63,8 @@ class SettingsFragment : Fragment() {
         val toggleTheme = view.findViewById<MaterialButtonToggleGroup>(R.id.toggle_theme)
 
         val appPreferences = AppPreferences(requireContext())
+
+        setupNotificationSettings(view, appPreferences)
         val initialButton = when (appPreferences.themeMode) {
             AppPreferences.THEME_LIGHT -> R.id.btn_theme_light
             AppPreferences.THEME_DARK -> R.id.btn_theme_dark
@@ -222,6 +244,92 @@ class SettingsFragment : Fragment() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun setupNotificationSettings(view: View, prefs: AppPreferences) {
+        NotificationHelper.createChannel(requireContext())
+
+        val switchEnabled = view.findViewById<MaterialSwitch>(R.id.switch_notifications_enabled)
+        val llOptions = view.findViewById<LinearLayout>(R.id.ll_notification_options)
+        val switchDuration = view.findViewById<MaterialSwitch>(R.id.switch_duration_alert)
+        val tilDurationHours = view.findViewById<TextInputLayout>(R.id.til_duration_hours)
+        val etDurationHours = view.findViewById<TextInputEditText>(R.id.et_duration_hours)
+        val switchTime = view.findViewById<MaterialSwitch>(R.id.switch_time_alert)
+        val tilTimeAlert = view.findViewById<TextInputLayout>(R.id.til_time_alert)
+        val etTimeAlert = view.findViewById<TextInputEditText>(R.id.et_time_alert)
+
+        // Restore saved state
+        switchEnabled.isChecked = prefs.notificationsEnabled
+        llOptions.visibility = if (prefs.notificationsEnabled) View.VISIBLE else View.GONE
+
+        switchDuration.isChecked = prefs.durationAlertEnabled
+        tilDurationHours.visibility = if (prefs.durationAlertEnabled) View.VISIBLE else View.GONE
+        etDurationHours.setText(prefs.durationAlertHours.toString())
+
+        switchTime.isChecked = prefs.timeAlertEnabled
+        tilTimeAlert.visibility = if (prefs.timeAlertEnabled) View.VISIBLE else View.GONE
+        etTimeAlert.setText(String.format("%02d:%02d", prefs.timeAlertHour, prefs.timeAlertMinute))
+
+        switchEnabled.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                requestNotificationPermissionIfNeeded {
+                    prefs.notificationsEnabled = true
+                    llOptions.visibility = View.VISIBLE
+                }
+            } else {
+                prefs.notificationsEnabled = false
+                llOptions.visibility = View.GONE
+            }
+        }
+
+        switchDuration.setOnCheckedChangeListener { _, isChecked ->
+            prefs.durationAlertEnabled = isChecked
+            tilDurationHours.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        etDurationHours.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                val hours = s?.toString()?.toIntOrNull()
+                if (hours != null && hours > 0) prefs.durationAlertHours = hours
+            }
+        })
+
+        switchTime.setOnCheckedChangeListener { _, isChecked ->
+            prefs.timeAlertEnabled = isChecked
+            tilTimeAlert.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        etTimeAlert.setOnClickListener {
+            TimePickerDialog(
+                requireContext(),
+                { _, hour, minute ->
+                    prefs.timeAlertHour = hour
+                    prefs.timeAlertMinute = minute
+                    etTimeAlert.setText(String.format("%02d:%02d", hour, minute))
+                },
+                prefs.timeAlertHour,
+                prefs.timeAlertMinute,
+                true
+            ).show()
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded(onGranted: () -> Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(), Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                onGranted()
+            } else {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                onGranted()
+            }
+        } else {
+            onGranted()
+        }
     }
 
     private fun redirectToLogin() {
