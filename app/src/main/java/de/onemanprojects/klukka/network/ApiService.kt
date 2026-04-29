@@ -13,6 +13,7 @@ import de.onemanprojects.klukka.model.ProjectsResponse
 import de.onemanprojects.klukka.model.StartRequest
 import de.onemanprojects.klukka.model.TrackedResponse
 import de.onemanprojects.klukka.model.UpdateTrackedRequest
+import de.onemanprojects.klukka.model.ServerInfoResponse
 import de.onemanprojects.klukka.model.UserDataResponse
 import okhttp3.ResponseBody
 import retrofit2.http.Body
@@ -120,5 +121,8 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body filter: ExportFilter
     ): ResponseBody
+
+    @GET("api/info")
+    suspend fun getServerInfo(): ServerInfoResponse
 
 }

@@ -9,9 +9,12 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.google.android.material.divider.MaterialDivider
 
 class AboutFragment : Fragment() {
+
+    private val viewModel: AboutViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -22,6 +25,17 @@ class AboutFragment : Fragment() {
 
         view.findViewById<TextView>(R.id.about_version).text =
             getString(R.string.about_version_prefix, BuildConfig.VERSION_NAME)
+
+        val tvBackendVersion = view.findViewById<TextView>(R.id.about_backend_version)
+        viewModel.backendVersion.observe(viewLifecycleOwner) { version ->
+            if (version != null) {
+                tvBackendVersion.text = getString(R.string.about_backend_version_prefix, version)
+                tvBackendVersion.visibility = View.VISIBLE
+            } else {
+                tvBackendVersion.visibility = View.GONE
+            }
+        }
+        viewModel.loadServerInfo()
 
         view.findViewById<View>(R.id.link_github_app).setOnClickListener {
             openUrl("https://github.com/placeholder/klukka-android")
