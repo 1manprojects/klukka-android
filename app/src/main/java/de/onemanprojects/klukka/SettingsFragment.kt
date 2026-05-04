@@ -36,13 +36,18 @@ class SettingsFragment : Fragment() {
 
     private val viewModel: SettingsViewModel by viewModels()
 
+    private var pendingGrantedCallback: (() -> Unit)? = null
+
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (!granted) {
+        if (granted) {
+            pendingGrantedCallback?.invoke()
+        } else {
             Snackbar.make(requireView(), R.string.notif_permission_required, Snackbar.LENGTH_LONG).show()
             view?.findViewById<MaterialSwitch>(R.id.switch_notifications_enabled)?.isChecked = false
         }
+        pendingGrantedCallback = null
     }
 
     override fun onCreateView(
@@ -324,8 +329,8 @@ class SettingsFragment : Fragment() {
             ) {
                 onGranted()
             } else {
+                pendingGrantedCallback = onGranted
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                onGranted()
             }
         } else {
             onGranted()
