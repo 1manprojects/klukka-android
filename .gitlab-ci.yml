@@ -25,8 +25,6 @@ variables:
       fi
     - echo "Building ${APP_NAME} version ${VERSION}"
     - export VERSION_CODE="${CI_PIPELINE_IID:-1}"
-    - export APKSIGNER=$(find ${ANDROID_HOME}/build-tools -name "apksigner" | tail -1)
-    - echo "Using apksigner at ${APKSIGNER}"
 
 .publish_apk: &publish_apk
   - |
@@ -34,29 +32,6 @@ variables:
       --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
       --upload-file "${APK_PATH}" \
       "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${VERSION}/${APK_FILENAME}"
-
-build:unsigned:
-  <<: *build_common
-  script:
-    - ./gradlew assembleRelease
-        -PversionName="${VERSION}"
-        -PversionCode="${VERSION_CODE}"
-    - keytool -genkey -v -keystore /tmp/debug.jks -alias debug
-        -keyalg RSA -keysize 2048 -validity 365
-        -storepass android -keypass android
-        -dname "CN=Debug, O=Debug, C=US"
-    - $APKSIGNER sign
-        --ks /tmp/debug.jks --ks-key-alias debug
-        --ks-pass pass:android --key-pass pass:android
-        --out app/build/outputs/apk/release/app-release-signed.apk
-        app/build/outputs/apk/release/app-release-unsigned.apk
-    - export APK_PATH="app/build/outputs/apk/release/app-release-signed.apk"
-    - export APK_FILENAME="${PACKAGE_NAME}-${VERSION}.apk"
-    - *publish_apk
-  rules:
-    - if: $KEYSTORE_FILE
-      when: never
-    - when: always
 
 build:signed:
   <<: *build_common
@@ -73,8 +48,7 @@ build:signed:
     - export APK_PATH="app/build/outputs/apk/release/app-release.apk"
     - export APK_FILENAME="${PACKAGE_NAME}-${VERSION}.apk"
     - *publish_apk
-    - export APK_PATH="app/build/outputs/apk/release/app-release-unsigned.apk"
-    - export APK_FILENAME="${PACKAGE_NAME}-${VERSION}-unsigned.apk"
-    - *publish_apk
   rules:
-    - if: $KEYSTORE_FILE
+    - if: $KEYSTORE_FILE != null && $KEYSTORE_FILE != ""
+      when: always
+    - when: never
