@@ -50,23 +50,24 @@ class AboutFragment : Fragment() {
     }
 
     private fun populateDependencies(container: LinearLayout) {
+        data class Dep(val name: String, val license: String, val version: String)
         val deps = listOf(
-            "AndroidX Core KTX"             to "1.18.0",
-            "AndroidX AppCompat"            to "1.7.1",
-            "Material Components"           to "1.13.0",
-            "AndroidX Activity"             to "1.13.0",
-            "AndroidX ConstraintLayout"     to "2.2.1",
-            "AndroidX Fragment KTX"         to "1.8.8",
-            "AndroidX Lifecycle ViewModel"  to "2.9.0",
-            "AndroidX RecyclerView"         to "1.4.0",
-            "AndroidX SwipeRefreshLayout"   to "1.1.0",
-            "AndroidX Security Crypto"      to "1.0.0",
-            "Retrofit"                      to "2.11.0",
-            "OkHttp"                        to "4.12.0",
-            "Gson"                          to "2.11.0",
+            Dep("AndroidX Core KTX",            "Apache-2.0", "1.18.0"),
+            Dep("AndroidX AppCompat",            "Apache-2.0", "1.7.1"),
+            Dep("Material Components",           "Apache-2.0", "1.13.0"),
+            Dep("AndroidX Activity",             "Apache-2.0", "1.13.0"),
+            Dep("AndroidX ConstraintLayout",     "Apache-2.0", "2.2.1"),
+            Dep("AndroidX Fragment KTX",         "Apache-2.0", "1.8.8"),
+            Dep("AndroidX Lifecycle ViewModel",  "Apache-2.0", "2.9.0"),
+            Dep("AndroidX RecyclerView",         "Apache-2.0", "1.4.0"),
+            Dep("AndroidX SwipeRefreshLayout",   "Apache-2.0", "1.1.0"),
+            Dep("AndroidX Security Crypto",      "Apache-2.0", "1.0.0"),
+            Dep("Retrofit",                      "Apache-2.0", "2.11.0"),
+            Dep("OkHttp",                        "Apache-2.0", "4.12.0"),
+            Dep("Gson",                          "Apache-2.0", "2.11.0"),
         )
         val inflater = LayoutInflater.from(requireContext())
-        deps.forEachIndexed { index, (name, version) ->
+        deps.forEachIndexed { index, dep ->
             if (index > 0) {
                 container.addView(MaterialDivider(requireContext()).apply {
                     layoutParams = LinearLayout.LayoutParams(
@@ -76,8 +77,8 @@ class AboutFragment : Fragment() {
                 })
             }
             val row = inflater.inflate(R.layout.item_dep_row, container, false)
-            row.findViewById<TextView>(R.id.dep_name).text = name
-            row.findViewById<TextView>(R.id.dep_version).text = version
+            row.findViewById<TextView>(R.id.dep_name).text = dep.name
+            row.findViewById<TextView>(R.id.dep_version).text = "${dep.license} · ${dep.version}"
             container.addView(row)
         }
     }
