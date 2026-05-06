@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.license)
 }
 
 android {
@@ -36,6 +37,50 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+val mitCompatibleLicenses = setOf(
+    "mit",
+    "apache 2.0",
+    "apache-2.0",
+    "the apache software license, version 2.0",
+    "the apache license, version 2.0",
+    "apache license, version 2.0",
+    "bsd 2-clause",
+    "bsd 3-clause",
+    "bsd-2-clause",
+    "bsd-3-clause",
+    "isc",
+    "unlicense",
+    "cc0-1.0",
+    "cc0 1.0 universal",
+    "boost software license 1.0",
+)
+
+tasks.register("checkLicenses") {
+    dependsOn("licenseDebugReport")
+    val reportFile = layout.buildDirectory.file("reports/licenses/licenseDebugReport.json")
+    inputs.file(reportFile)
+    doLast {
+        val json = reportFile.get().asFile.readText()
+        val violations = mutableListOf<String>()
+        val entries = json.trim().removePrefix("[").removeSuffix("]").split("},{")
+        for (entry in entries) {
+            val nameMatch = Regex("\"project\":\"([^\"]+)\"").find(entry)
+            val licenseMatches = Regex("\"license\":\"([^\"]+)\"").findAll(entry)
+            val project = nameMatch?.groupValues?.get(1) ?: "unknown"
+            val licenses = licenseMatches.map { it.groupValues[1] }.toList()
+            if (licenses.none { it.lowercase() in mitCompatibleLicenses }) {
+                violations.add("$project: ${licenses.ifEmpty { listOf("no license found") }}")
+            }
+        }
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                "Non-MIT-compatible licenses detected:\n" + violations.joinToString("\n") { "  - $it" }
+            )
+        }
+        println("License check passed: all ${entries.size} dependencies use MIT-compatible licenses.")
     }
 }
 

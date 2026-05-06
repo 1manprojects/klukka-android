@@ -16,7 +16,7 @@ object TrackingAlarmScheduler {
         // If duration already elapsed (e.g. after app restart), fire immediately
         val scheduleAt = if (triggerAt <= System.currentTimeMillis()) System.currentTimeMillis() + 1_000L else triggerAt
         val pendingIntent = buildPendingIntent(context, REQUEST_DURATION, TrackingAlarmReceiver.ALARM_DURATION)
-        alarmManager(context).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, scheduleAt, pendingIntent)
+        alarmManager(context).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, scheduleAt, pendingIntent)
         AppLogger.d("TrackingAlarmScheduler", "Duration alarm set for +${hours}h from start")
     }
 
@@ -32,7 +32,7 @@ object TrackingAlarmScheduler {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
         val pendingIntent = buildPendingIntent(context, REQUEST_TIME, TrackingAlarmReceiver.ALARM_TIME)
-        alarmManager(context).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+        alarmManager(context).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
         AppLogger.d("TrackingAlarmScheduler", "Time alarm set for $hour:$minute")
     }
 
