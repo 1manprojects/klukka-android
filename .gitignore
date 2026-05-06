@@ -1,15 +1,35 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Claude Code
+.claude/
+
+# IDE - Android Studio / IntelliJ IDEA
+.idea/
+
+# Gradle
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
 local.properties
+
+# Build outputs
+/build/
+**/build/
+
+# Android
+*.iml
+*.apk
+*.aab
+*.ap_
+*.dex
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+*.class
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
