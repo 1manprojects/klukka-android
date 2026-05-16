@@ -85,25 +85,55 @@ jobs:
         if: steps.check_secrets.outputs.has_keystore == 'true'
         run: chmod +x ./gradlew
       
-      - name: Decode keystore
-        if: steps.check_secrets.outputs.has_keystore == 'true'
-        run: |
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > /tmp/release.jks
-      
-      - name: Build signed APK
+      - name: Build unsigned APK
         if: steps.check_secrets.outputs.has_keystore == 'true'
         run: |
           ./gradlew assembleRelease \
             -PversionName="${VERSION}" \
-            -PversionCode="${VERSION_CODE}" \
-            -Pandroid.injected.signing.store.file=/tmp/release.jks \
-            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_STORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key.alias="${{ secrets.KEYSTORE_KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key.password="${{ secrets.KEYSTORE_KEY_PASSWORD }}"
+            -PversionCode="${VERSION_CODE}"
+      
+      - name: Decode keystore and sign APK
+        if: steps.check_secrets.outputs.has_keystore == 'true'
+        run: |
+          # Decode keystore
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > ${{ github.workspace }}/release.jks
+          
+          # Find the build-tools version
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools/ | sort -V | tail -n 1)
+          echo "Using build-tools version: $BUILD_TOOLS_VERSION"
+          
+          # Find the unsigned APK (could be app-release-unsigned.apk or app-release.apk)
+          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            UNSIGNED_APK="app/build/outputs/apk/release/app-release-unsigned.apk"
+          else
+            UNSIGNED_APK="app/build/outputs/apk/release/app-release.apk"
+          fi
+          
+          echo "Signing APK: $UNSIGNED_APK"
+          
+          # Sign the APK
+          $ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner sign \
+            --ks ${{ github.workspace }}/release.jks \
+            --ks-key-alias "${{ secrets.KEYSTORE_KEY_ALIAS }}" \
+            --ks-pass pass:"${{ secrets.KEYSTORE_STORE_PASSWORD }}" \
+            --key-pass pass:"${{ secrets.KEYSTORE_KEY_PASSWORD }}" \
+            --out app/build/outputs/apk/release/app-release-signed.apk \
+            $UNSIGNED_APK
+          
+          # Move signed APK to expected location
+          mv app/build/outputs/apk/release/app-release-signed.apk app/build/outputs/apk/release/app-release.apk
+      
+      - name: Verify APK signature
+        if: steps.check_secrets.outputs.has_keystore == 'true'
+        run: |
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools/ | sort -V | tail -n 1)
+          echo "Verifying APK signature..."
+          $ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
+          echo "✅ APK signature verified successfully!"
       
       - name: Clean up keystore
         if: always()
-        run: rm -f /tmp/release.jks
+        run: rm -f ${{ github.workspace }}/release.jks
       
       - name: Rename APK
         if: steps.check_secrets.outputs.has_keystore == 'true'
@@ -111,6 +141,7 @@ jobs:
           APK_FILENAME="${PACKAGE_NAME}-${VERSION}.apk"
           mv app/build/outputs/apk/release/app-release.apk "${APK_FILENAME}"
           echo "APK_FILENAME=${APK_FILENAME}" >> $GITHUB_ENV
+          echo "✅ APK renamed to: ${APK_FILENAME}"
       
       - name: Upload APK artifact
         if: steps.check_secrets.outputs.has_keystore == 'true'
