@@ -9,11 +9,17 @@ on:
     tags:
       - '*'
   pull_request:
+  release:
+    types: [created, published]
   workflow_dispatch:
 
 env:
   APP_NAME: "Klukka"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=true"
+
+# Add permissions for the GITHUB_TOKEN
+permissions:
+  contents: write
 
 jobs:
   build-signed:
@@ -57,7 +63,11 @@ jobs:
         if: steps.check_secrets.outputs.has_keystore == 'true'
         id: version
         run: |
-          if [ -n "${{ github.ref_type }}" ] && [ "${{ github.ref_type }}" == "tag" ]; then
+          # Extract tag name from different event types
+          if [ "${{ github.event_name }}" == "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            PACKAGE_NAME="${APP_NAME}"
+          elif [ -n "${{ github.ref_type }}" ] && [ "${{ github.ref_type }}" == "tag" ]; then
             VERSION="${{ github.ref_name }}"
             PACKAGE_NAME="${APP_NAME}"
           else
@@ -110,10 +120,11 @@ jobs:
           path: ${{ env.APK_FILENAME }}
           retention-days: 30
       
-      - name: Create GitHub Release (for tags)
-        if: steps.check_secrets.outputs.has_keystore == 'true' && github.ref_type == 'tag'
+      - name: Upload APK to Release
+        if: steps.check_secrets.outputs.has_keystore == 'true' && (github.ref_type == 'tag' || github.event_name == 'release')
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}
           files: ${{ env.APK_FILENAME }}
           draft: false
           prerelease: false
