@@ -6,18 +6,17 @@ on:
       - main
       - master
       - develop
-    tags:
-      - '*'
+    tags-ignore:
+      - '*'  # Don't trigger on tag pushes - let release event handle it
   pull_request:
   release:
-    types: [created, published]
+    types: [published]  # Only trigger on 'published', not 'created'
   workflow_dispatch:
 
 env:
   APP_NAME: "Klukka"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=true"
 
-# Add permissions for the GITHUB_TOKEN
 permissions:
   contents: write
 
@@ -29,7 +28,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # Check if secrets are available - skip build if not
       - name: Check for keystore
         id: check_secrets
         run: |
@@ -95,14 +93,11 @@ jobs:
       - name: Decode keystore and sign APK
         if: steps.check_secrets.outputs.has_keystore == 'true'
         run: |
-          # Decode keystore
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > ${{ github.workspace }}/release.jks
           
-          # Find the build-tools version
           BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools/ | sort -V | tail -n 1)
           echo "Using build-tools version: $BUILD_TOOLS_VERSION"
           
-          # Find the unsigned APK (could be app-release-unsigned.apk or app-release.apk)
           if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
             UNSIGNED_APK="app/build/outputs/apk/release/app-release-unsigned.apk"
           else
@@ -111,7 +106,6 @@ jobs:
           
           echo "Signing APK: $UNSIGNED_APK"
           
-          # Sign the APK
           $ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner sign \
             --ks ${{ github.workspace }}/release.jks \
             --ks-key-alias "${{ secrets.KEYSTORE_KEY_ALIAS }}" \
@@ -120,7 +114,6 @@ jobs:
             --out app/build/outputs/apk/release/app-release-signed.apk \
             $UNSIGNED_APK
           
-          # Move signed APK to expected location
           mv app/build/outputs/apk/release/app-release-signed.apk app/build/outputs/apk/release/app-release.apk
       
       - name: Verify APK signature
@@ -152,10 +145,10 @@ jobs:
           retention-days: 30
       
       - name: Upload APK to Release
-        if: steps.check_secrets.outputs.has_keystore == 'true' && (github.ref_type == 'tag' || github.event_name == 'release')
+        if: steps.check_secrets.outputs.has_keystore == 'true' && github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}
+          tag_name: ${{ github.event.release.tag_name }}
           files: ${{ env.APK_FILENAME }}
           draft: false
           prerelease: false
