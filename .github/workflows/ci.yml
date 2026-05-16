@@ -18,20 +18,31 @@ env:
 jobs:
   build-signed:
     runs-on: ubuntu-latest
-    # Only run if keystore secrets are configured
-    if: ${{ secrets.KEYSTORE_FILE != '' }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      # Check if secrets are available - skip build if not
+      - name: Check for keystore
+        id: check_secrets
+        run: |
+          if [ -z "${{ secrets.KEYSTORE_FILE }}" ]; then
+            echo "KEYSTORE_FILE secret is not set. Skipping build."
+            echo "has_keystore=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_keystore=true" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Set up JDK 17
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       
       - name: Setup Gradle cache
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -43,6 +54,7 @@ jobs:
             ${{ runner.os }}-gradle-
       
       - name: Set version variables
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         id: version
         run: |
           if [ -n "${{ github.ref_type }}" ] && [ "${{ github.ref_type }}" == "tag" ]; then
@@ -60,13 +72,16 @@ jobs:
           echo "Building ${APP_NAME} version ${VERSION}"
       
       - name: Make gradlew executable
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         run: chmod +x ./gradlew
       
       - name: Decode keystore
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > /tmp/release.jks
       
       - name: Build signed APK
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         run: |
           ./gradlew assembleRelease \
             -PversionName="${VERSION}" \
@@ -81,12 +96,14 @@ jobs:
         run: rm -f /tmp/release.jks
       
       - name: Rename APK
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         run: |
           APK_FILENAME="${PACKAGE_NAME}-${VERSION}.apk"
           mv app/build/outputs/apk/release/app-release.apk "${APK_FILENAME}"
           echo "APK_FILENAME=${APK_FILENAME}" >> $GITHUB_ENV
       
       - name: Upload APK artifact
+        if: steps.check_secrets.outputs.has_keystore == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APK_FILENAME }}
@@ -94,7 +111,7 @@ jobs:
           retention-days: 30
       
       - name: Create GitHub Release (for tags)
-        if: github.ref_type == 'tag'
+        if: steps.check_secrets.outputs.has_keystore == 'true' && github.ref_type == 'tag'
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.APK_FILENAME }}
