@@ -1,6 +1,6 @@
 # Klukka Android Client
 
-This Application requires a running Klukka TimeTracking Server to function.
+This Application requires a running [Klukka TimeTracking Server](https://github.com/1manprojects/klukka) to function.
 
 ### AI-Notice
 
