@@ -77,12 +77,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 R.id.nav_github_app -> {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com")))
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/1manprojects/klukka-android")))
                     drawerLayout.closeDrawer(GravityCompat.START)
                     return@setNavigationItemSelectedListener true
                 }
                 R.id.nav_github_backend -> {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com")))
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/1manprojects/klukka")))
                     drawerLayout.closeDrawer(GravityCompat.START)
                     return@setNavigationItemSelectedListener true
                 }
