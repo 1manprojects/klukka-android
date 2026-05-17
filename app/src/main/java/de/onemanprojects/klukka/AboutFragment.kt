@@ -38,10 +38,10 @@ class AboutFragment : Fragment() {
         viewModel.loadServerInfo()
 
         view.findViewById<View>(R.id.link_github_app).setOnClickListener {
-            openUrl("https://github.com/placeholder/klukka-android")
+            openUrl("https://github.com/1manprojects/klukka-android")
         }
         view.findViewById<View>(R.id.link_github_backend).setOnClickListener {
-            openUrl("https://github.com/placeholder/klukka-backend")
+            openUrl("https://github.com/1manprojects/klukka")
         }
 
         populateDependencies(view.findViewById(R.id.about_deps_container))
