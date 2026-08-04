@@ -74,6 +74,15 @@
     <string name="settings_no_tokens">No tokens</string>
     <string name="settings_groups_section">Groups</string>
     <string name="settings_no_groups">Not a member of any group</string>
+    <string name="settings_data_section">Data</string>
+    <string name="settings_export_data_btn">Export My Data</string>
+    <string name="settings_export_data_hint">The export does not include group projects, only your personal ones.</string>
+    <string name="settings_import_data_btn">Import Data</string>
+    <string name="settings_import_warning_title">Import Data</string>
+    <string name="settings_import_warning_message">This will not overwrite your existing projects. It will only add the projects and tracked time contained in the file.</string>
+    <string name="settings_import_warning_continue">Choose File</string>
+    <string name="settings_export_success">Data exported successfully</string>
+    <string name="settings_import_success">Data imported successfully</string>
     <string name="token_no_description">API Token</string>
     <string name="group_no_title">Group</string>
     <string name="delete_token_title">Delete Token</string>

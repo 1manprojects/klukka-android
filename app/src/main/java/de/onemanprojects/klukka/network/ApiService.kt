@@ -6,6 +6,8 @@ import de.onemanprojects.klukka.model.ArchiveRequest
 import de.onemanprojects.klukka.model.CommentUpdate
 import de.onemanprojects.klukka.model.DataFilter
 import de.onemanprojects.klukka.model.ExportFilter
+import de.onemanprojects.klukka.model.ExportUserData
+import de.onemanprojects.klukka.model.ExportUserDataResponse
 import com.google.gson.JsonElement
 import de.onemanprojects.klukka.model.NewProjectRequest
 import de.onemanprojects.klukka.model.Project
@@ -113,6 +115,17 @@ interface ApiService {
     @GET("api/user/delete")
     suspend fun deleteAccount(
         @Header("Authorization") token: String
+    ): ApiResponse
+
+    @GET("api/user/export")
+    suspend fun exportUserData(
+        @Header("Authorization") token: String
+    ): ExportUserDataResponse
+
+    @POST("api/user/import")
+    suspend fun importUserData(
+        @Header("Authorization") token: String,
+        @Body data: ExportUserData
     ): ApiResponse
 
     @Streaming

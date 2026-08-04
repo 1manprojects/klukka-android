@@ -384,6 +384,23 @@
         },
         "required" : [ "detailed" ]
       },
+      "ExportUserData" : {
+        "type" : "object",
+        "properties" : {
+          "projects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Project"
+            }
+          },
+          "trackedItems" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Tracked"
+            }
+          }
+        }
+      },
       "GroupDetails" : {
         "type" : "object",
         "properties" : {
@@ -604,6 +621,44 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/TrackedResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/add" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Add Personal Project",
+        "operationId" : "user addPersonalProject",
+        "requestBody" : {
+          "description" : "Project object to add",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Project"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }
@@ -1828,17 +1883,18 @@
         } ]
       }
     },
-    "/api/update" : {
+    "/api/stop" : {
       "post" : {
         "tags" : [ "User" ],
-        "summary" : "Update Tracking",
-        "operationId" : "user updateTracking",
+        "summary" : "Stop Tracking",
+        "operationId" : "user stopTracking",
         "requestBody" : {
-          "description" : "Tracked object",
+          "description" : "Tracking ID to stop",
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Tracked"
+                "type" : "integer",
+                "format" : "int32"
               }
             }
           },
@@ -1866,17 +1922,17 @@
         } ]
       }
     },
-    "/api/user/addPersonalProject" : {
+    "/api/update" : {
       "post" : {
         "tags" : [ "User" ],
-        "summary" : "Add Personal Project",
-        "operationId" : "user addPersonalProject",
+        "summary" : "Update Tracking",
+        "operationId" : "user updateTracking",
         "requestBody" : {
-          "description" : "Project object to add",
+          "description" : "Tracked object",
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Project"
+                "$ref" : "#/components/schemas/Tracked"
               }
             }
           },
@@ -2082,6 +2138,71 @@
         } ]
       }
     },
+    "/api/user/export" : {
+      "get" : {
+        "tags" : [ "User" ],
+        "summary" : "Export User Data",
+        "operationId" : "user export data",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportUserData"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
+    "/api/user/import" : {
+      "post" : {
+        "tags" : [ "User" ],
+        "summary" : "Import User Data",
+        "operationId" : "user import data",
+        "requestBody" : {
+          "description" : "Projects and tracked info",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExportUserData"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BooleanResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "UNAUTHORIZED"
+          }
+        },
+        "security" : [ {
+          "Authorization" : [ ]
+        }, {
+          "jwtCookie" : [ ]
+        } ]
+      }
+    },
     "/api/user/leaveGroup" : {
       "post" : {
         "tags" : [ "Groups" ],
@@ -2130,45 +2251,6 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/UserApiTokenResponse"
-                }
-              }
-            }
-          },
-          "401" : {
-            "description" : "UNAUTHORIZED"
-          }
-        },
-        "security" : [ {
-          "Authorization" : [ ]
-        }, {
-          "jwtCookie" : [ ]
-        } ]
-      }
-    },
-    "/api/user/stop" : {
-      "post" : {
-        "tags" : [ "User" ],
-        "summary" : "Stop Tracking",
-        "operationId" : "user stopTracking",
-        "requestBody" : {
-          "description" : "Tracking ID to stop",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "integer",
-                "format" : "int32"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/BooleanResponse"
                 }
               }
             }

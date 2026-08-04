@@ -3,14 +3,18 @@ package de.onemanprojects.klukka
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonParseException
 import com.google.gson.JsonPrimitive
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import de.onemanprojects.klukka.model.ExportUserData
 import de.onemanprojects.klukka.model.UserData
 import de.onemanprojects.klukka.network.ApiClient
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import java.nio.charset.StandardCharsets
 
 private const val TAG = "SettingsViewModel"
 
@@ -35,6 +39,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _loggedOut = MutableLiveData<Boolean>(false)
     val loggedOut: LiveData<Boolean> = _loggedOut
+
+    private val _exportBytes = MutableLiveData<ByteArray?>()
+    val exportBytes: LiveData<ByteArray?> = _exportBytes
+
+    private val _exportLoading = MutableLiveData(false)
+    val exportLoading: LiveData<Boolean> = _exportLoading
+
+    private val _exportError = MutableLiveData<String?>()
+    val exportError: LiveData<String?> = _exportError
+
+    // null = idle, true = success, false = error
+    private val _importResult = MutableLiveData<Boolean?>(null)
+    val importResult: LiveData<Boolean?> = _importResult
+
+    private val _importLoading = MutableLiveData(false)
+    val importLoading: LiveData<Boolean> = _importLoading
+
+    private val _importError = MutableLiveData<String?>()
+    val importError: LiveData<String?> = _importError
+
+    private val gson = GsonBuilder().setPrettyPrinting().create()
 
     fun loadUserData() {
         val serverUrl = secureStorage.getServerUrl()
@@ -148,5 +173,89 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 _error.value = "Failed to delete account"
             }
         }
+    }
+
+    fun exportUserData() {
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+        AppLogger.i(TAG, "Exporting user data")
+        _exportLoading.value = true
+        _exportError.value = null
+        _exportBytes.value = null
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                val result = service.exportUserData("Bearer $apiToken")
+                val json = gson.toJson(result.payload ?: ExportUserData(emptyList(), emptyList()))
+                _exportBytes.value = json.toByteArray(StandardCharsets.UTF_8)
+            } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error exporting user data: ${e.code()}", e)
+                if (e.code() == 401) {
+                    secureStorage.clearToken()
+                    _unauthorized.value = true
+                } else {
+                    _exportError.value = "Export failed (${e.code()})"
+                }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error exporting user data", e)
+                _exportError.value = "Network error: could not reach the server"
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Error exporting user data", e)
+                _exportError.value = "Export failed"
+            } finally {
+                _exportLoading.value = false
+            }
+        }
+    }
+
+    fun clearExportBytes() {
+        _exportBytes.value = null
+    }
+
+    fun importUserData(json: String) {
+        AppLogger.i(TAG, "Importing user data")
+        val data = try {
+            gson.fromJson(json, ExportUserData::class.java)
+        } catch (e: JsonParseException) {
+            AppLogger.e(TAG, "Invalid import file", e)
+            _importError.value = "This file is not a valid Klukka export"
+            return
+        }
+        if (data == null) {
+            _importError.value = "This file is not a valid Klukka export"
+            return
+        }
+        val serverUrl = secureStorage.getServerUrl()
+        val apiToken = secureStorage.getApiToken()
+        _importLoading.value = true
+        _importError.value = null
+        _importResult.value = null
+        viewModelScope.launch {
+            try {
+                val service = ApiClient.create(serverUrl)
+                service.importUserData("Bearer $apiToken", data)
+                _importResult.value = true
+            } catch (e: HttpException) {
+                AppLogger.e(TAG, "HTTP error importing user data: ${e.code()}", e)
+                if (e.code() == 401) {
+                    secureStorage.clearToken()
+                    _unauthorized.value = true
+                } else {
+                    _importError.value = "Import failed (${e.code()})"
+                }
+            } catch (e: IOException) {
+                AppLogger.e(TAG, "Network error importing user data", e)
+                _importError.value = "Network error: could not reach the server"
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Error importing user data", e)
+                _importError.value = "Import failed"
+            } finally {
+                _importLoading.value = false
+            }
+        }
+    }
+
+    fun clearImportResult() {
+        _importResult.value = null
     }
 }

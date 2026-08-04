@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -24,11 +25,15 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import de.onemanprojects.klukka.model.Group
 import de.onemanprojects.klukka.model.UserApiToken
+import java.io.IOException
+import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 
 private const val TAG = "SettingsFragment"
 
@@ -37,6 +42,7 @@ class SettingsFragment : Fragment() {
     private val viewModel: SettingsViewModel by viewModels()
 
     private var pendingGrantedCallback: (() -> Unit)? = null
+    private var pendingExportBytes: ByteArray? = null
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -48,6 +54,38 @@ class SettingsFragment : Fragment() {
             view?.findViewById<MaterialSwitch>(R.id.switch_notifications_enabled)?.isChecked = false
         }
         pendingGrantedCallback = null
+    }
+
+    private val createExportDocument = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri: Uri? ->
+        val bytes = pendingExportBytes ?: return@registerForActivityResult
+        pendingExportBytes = null
+        if (uri == null) return@registerForActivityResult
+        try {
+            requireContext().contentResolver.openOutputStream(uri)?.use { it.write(bytes) }
+            Snackbar.make(requireView(), R.string.settings_export_success, Snackbar.LENGTH_SHORT).show()
+        } catch (e: IOException) {
+            Snackbar.make(requireView(), "Failed to save file", Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+    private val openImportDocument = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri == null) return@registerForActivityResult
+        try {
+            val json = requireContext().contentResolver.openInputStream(uri)
+                ?.use { it.readBytes() }
+                ?.toString(StandardCharsets.UTF_8)
+            if (json == null) {
+                Snackbar.make(requireView(), "Failed to read file", Snackbar.LENGTH_LONG).show()
+            } else {
+                viewModel.importUserData(json)
+            }
+        } catch (e: IOException) {
+            Snackbar.make(requireView(), "Failed to read file", Snackbar.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreateView(
@@ -66,6 +104,10 @@ class SettingsFragment : Fragment() {
         val btnLogout = view.findViewById<MaterialButton>(R.id.btn_logout)
         val btnDeleteAccount = view.findViewById<MaterialButton>(R.id.btn_delete_account)
         val toggleTheme = view.findViewById<MaterialButtonToggleGroup>(R.id.toggle_theme)
+        val btnExportData = view.findViewById<MaterialButton>(R.id.btn_export_data)
+        val progressExportData = view.findViewById<LinearProgressIndicator>(R.id.progress_export_data)
+        val btnImportData = view.findViewById<MaterialButton>(R.id.btn_import_data)
+        val progressImportData = view.findViewById<LinearProgressIndicator>(R.id.progress_import_data)
 
         val appPreferences = AppPreferences(requireContext())
 
@@ -112,6 +154,46 @@ class SettingsFragment : Fragment() {
 
         btnDeleteAccount.setOnClickListener {
             showDeleteAccountConfirmation()
+        }
+
+        btnExportData.setOnClickListener {
+            viewModel.exportUserData()
+        }
+
+        btnImportData.setOnClickListener {
+            showImportWarning()
+        }
+
+        viewModel.exportLoading.observe(viewLifecycleOwner) { isLoading ->
+            progressExportData.visibility = if (isLoading) View.VISIBLE else View.GONE
+            btnExportData.isEnabled = !isLoading
+        }
+
+        viewModel.exportBytes.observe(viewLifecycleOwner) { bytes ->
+            if (bytes == null) return@observe
+            viewModel.clearExportBytes()
+            pendingExportBytes = bytes
+            createExportDocument.launch("klukka_export_${LocalDate.now()}.json")
+        }
+
+        viewModel.exportError.observe(viewLifecycleOwner) { error ->
+            if (error != null) Snackbar.make(requireView(), error, Snackbar.LENGTH_LONG).show()
+        }
+
+        viewModel.importLoading.observe(viewLifecycleOwner) { isLoading ->
+            progressImportData.visibility = if (isLoading) View.VISIBLE else View.GONE
+            btnImportData.isEnabled = !isLoading
+        }
+
+        viewModel.importResult.observe(viewLifecycleOwner) { success ->
+            if (success == true) {
+                viewModel.clearImportResult()
+                Snackbar.make(requireView(), R.string.settings_import_success, Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.importError.observe(viewLifecycleOwner) { error ->
+            if (error != null) Snackbar.make(requireView(), error, Snackbar.LENGTH_LONG).show()
         }
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
@@ -223,6 +305,17 @@ class SettingsFragment : Fragment() {
             .setPositiveButton(R.string.leave_group_btn) { _, _ ->
                 AppLogger.d(TAG, "Leave group confirmed: id=${group.id}")
                 viewModel.leaveGroup(group)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showImportWarning() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_import_warning_title)
+            .setMessage(R.string.settings_import_warning_message)
+            .setPositiveButton(R.string.settings_import_warning_continue) { _, _ ->
+                openImportDocument.launch(arrayOf("application/json"))
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
