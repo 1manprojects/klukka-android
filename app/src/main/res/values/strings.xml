@@ -94,6 +94,8 @@
     <string name="delete_account_confirm_btn">Delete My Account</string>
     <string name="tracked_duration_label">Duration:</string>
     <string name="nav_activity">Activity</string>
+    <string name="activity_period_prev">Previous period</string>
+    <string name="activity_period_next">Next period</string>
     <string name="activity_preset_today">Today</string>
     <string name="activity_preset_week">Week</string>
     <string name="activity_preset_month">Month</string>

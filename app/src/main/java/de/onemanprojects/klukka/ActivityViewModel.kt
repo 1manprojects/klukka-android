@@ -20,6 +20,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 private const val TAG = "ActivityViewModel"
 
@@ -97,6 +98,46 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
         _preset.value = ActivityPreset.CUSTOM
         _startDate.value = start
         _endDate.value = end
+        loadData()
+    }
+
+    fun navigatePrev() = navigate(forward = false)
+
+    fun navigateNext() = navigate(forward = true)
+
+    private fun navigate(forward: Boolean) {
+        val start = _startDate.value ?: return
+        val end = _endDate.value ?: return
+        when (_preset.value) {
+            ActivityPreset.TODAY -> {
+                val shift = if (forward) 1L else -1L
+                _startDate.value = start.plusDays(shift)
+                _endDate.value = end.plusDays(shift)
+            }
+            ActivityPreset.WEEK -> {
+                val shift = if (forward) 1L else -1L
+                _startDate.value = start.plusWeeks(shift)
+                _endDate.value = end.plusWeeks(shift)
+            }
+            ActivityPreset.MONTH -> {
+                val shift = if (forward) 1L else -1L
+                val newStart = start.plusMonths(shift).withDayOfMonth(1)
+                val today = LocalDate.now()
+                val newEnd = if (newStart.year == today.year && newStart.month == today.month) {
+                    today
+                } else {
+                    newStart.withDayOfMonth(newStart.lengthOfMonth())
+                }
+                _startDate.value = newStart
+                _endDate.value = newEnd
+            }
+            ActivityPreset.CUSTOM, null -> {
+                val spanDays = ChronoUnit.DAYS.between(start, end) + 1
+                val shift = if (forward) spanDays else -spanDays
+                _startDate.value = start.plusDays(shift)
+                _endDate.value = end.plusDays(shift)
+            }
+        }
         loadData()
     }
 

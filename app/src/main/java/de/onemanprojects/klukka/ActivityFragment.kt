@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,6 +57,8 @@ class ActivityFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val togglePreset = view.findViewById<MaterialButtonToggleGroup>(R.id.toggle_preset)
+        val btnPeriodPrev = view.findViewById<ImageButton>(R.id.btn_period_prev)
+        val btnPeriodNext = view.findViewById<ImageButton>(R.id.btn_period_next)
         val etDateFrom = view.findViewById<TextInputEditText>(R.id.et_date_from)
         val etDateTo = view.findViewById<TextInputEditText>(R.id.et_date_to)
         val progressBar = view.findViewById<LinearProgressIndicator>(R.id.progress_loading)
@@ -79,6 +82,9 @@ class ActivityFragment : Fragment() {
                 R.id.btn_preset_month -> viewModel.selectPreset(ActivityPreset.MONTH)
             }
         }
+
+        btnPeriodPrev.setOnClickListener { viewModel.navigatePrev() }
+        btnPeriodNext.setOnClickListener { viewModel.navigateNext() }
 
         etDateFrom.setOnClickListener {
             val currentMs = viewModel.startDate.value
