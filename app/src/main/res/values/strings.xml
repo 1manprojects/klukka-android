@@ -152,4 +152,14 @@
     <string name="notif_time_title">Tracking still active</string>
     <string name="notif_time_text">"%1$s" is still being tracked (past %2$s)</string>
     <string name="notif_permission_required">Notification permission is required. Please grant it in system settings.</string>
+
+    <!-- Autostop settings -->
+    <string name="settings_autostop_section">Auto-stop</string>
+    <string name="autostop_duration_label">Stop after tracking exceeds duration</string>
+    <string name="autostop_duration_hours_hint">Hours (e.g. 8)</string>
+    <string name="autostop_time_label">Stop at time</string>
+    <string name="autostop_time_hint">Time (tap to pick)</string>
+    <string name="autostop_dialog_title">Tracking will be stopped</string>
+    <string name="autostop_dialog_message">"%1$s" will be stopped in %2$d second(s).\nTap Keep Tracking to cancel.</string>
+    <string name="autostop_keep_tracking">Keep Tracking</string>
 </resources>

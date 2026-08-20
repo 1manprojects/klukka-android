@@ -112,6 +112,7 @@ class SettingsFragment : Fragment() {
         val appPreferences = AppPreferences(requireContext())
 
         setupNotificationSettings(view, appPreferences)
+        setupAutostopSettings(view, appPreferences)
         val initialButton = when (appPreferences.themeMode) {
             AppPreferences.THEME_LIGHT -> R.id.btn_theme_light
             AppPreferences.THEME_DARK -> R.id.btn_theme_dark
@@ -409,6 +410,56 @@ class SettingsFragment : Fragment() {
                 },
                 prefs.timeAlertHour,
                 prefs.timeAlertMinute,
+                true
+            ).show()
+        }
+    }
+
+    private fun setupAutostopSettings(view: View, prefs: AppPreferences) {
+        val switchDuration = view.findViewById<MaterialSwitch>(R.id.switch_autostop_duration)
+        val tilDurationHours = view.findViewById<TextInputLayout>(R.id.til_autostop_duration_hours)
+        val etDurationHours = view.findViewById<TextInputEditText>(R.id.et_autostop_duration_hours)
+        val switchTime = view.findViewById<MaterialSwitch>(R.id.switch_autostop_time)
+        val tilTime = view.findViewById<TextInputLayout>(R.id.til_autostop_time)
+        val etTime = view.findViewById<TextInputEditText>(R.id.et_autostop_time)
+
+        switchDuration.isChecked = prefs.autostopDurationEnabled
+        tilDurationHours.visibility = if (prefs.autostopDurationEnabled) View.VISIBLE else View.GONE
+        etDurationHours.setText(prefs.autostopDurationHours.toString())
+
+        switchTime.isChecked = prefs.autostopTimeEnabled
+        tilTime.visibility = if (prefs.autostopTimeEnabled) View.VISIBLE else View.GONE
+        etTime.setText(String.format("%02d:%02d", prefs.autostopTimeHour, prefs.autostopTimeMinute))
+
+        switchDuration.setOnCheckedChangeListener { _, isChecked ->
+            prefs.autostopDurationEnabled = isChecked
+            tilDurationHours.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        etDurationHours.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                val hours = s?.toString()?.toIntOrNull()
+                if (hours != null && hours > 0) prefs.autostopDurationHours = hours
+            }
+        })
+
+        switchTime.setOnCheckedChangeListener { _, isChecked ->
+            prefs.autostopTimeEnabled = isChecked
+            tilTime.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        etTime.setOnClickListener {
+            TimePickerDialog(
+                requireContext(),
+                { _, hour, minute ->
+                    prefs.autostopTimeHour = hour
+                    prefs.autostopTimeMinute = minute
+                    etTime.setText(String.format("%02d:%02d", hour, minute))
+                },
+                prefs.autostopTimeHour,
+                prefs.autostopTimeMinute,
                 true
             ).show()
         }

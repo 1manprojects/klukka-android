@@ -1,17 +1,24 @@
 package de.onemanprojects.klukka
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.android.material.snackbar.Snackbar
@@ -21,6 +28,10 @@ class ActiveTrackingFragment : Fragment() {
 
     private val viewModel: ActiveTrackingViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
+
+    private var autostopReceiver: BroadcastReceiver? = null
+    private var autostopDialog: AlertDialog? = null
+    private var autostopCountdown: CountDownTimer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -101,6 +112,74 @@ class ActiveTrackingFragment : Fragment() {
         viewModel.unauthorized.observe(viewLifecycleOwner) { isUnauthorized ->
             if (isUnauthorized == true) redirectToLogin()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter(TrackingAlarmReceiver.ACTION_AUTOSTOP_WARNING)
+        autostopReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                showAutostopDialog()
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireContext().registerReceiver(autostopReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            requireContext().registerReceiver(autostopReceiver, filter)
+        }
+        // Show dialog if alarm fired while the fragment was not visible
+        val prefs = AppPreferences(requireContext())
+        if (prefs.autostopPending) {
+            showAutostopDialog()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        autostopReceiver?.let {
+            try { requireContext().unregisterReceiver(it) } catch (_: IllegalArgumentException) {}
+        }
+        autostopReceiver = null
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        autostopCountdown?.cancel()
+        autostopDialog?.dismiss()
+    }
+
+    private fun showAutostopDialog() {
+        if (!isAdded) return
+        if (autostopDialog?.isShowing == true) return
+        val event = mainViewModel.activeTracking.value ?: return
+        val projectName = event.project.title ?: ""
+
+        AppPreferences(requireContext()).autostopPending = false
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.autostop_dialog_title)
+            .setMessage(getString(R.string.autostop_dialog_message, projectName, 30))
+            .setPositiveButton(R.string.autostop_keep_tracking) { d, _ ->
+                autostopCountdown?.cancel()
+                d.dismiss()
+            }
+            .setCancelable(false)
+            .create()
+
+        autostopDialog = dialog
+        dialog.show()
+
+        autostopCountdown = object : CountDownTimer(30_000L, 1_000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                val seconds = (millisUntilFinished / 1000L).toInt() + 1
+                dialog.setMessage(getString(R.string.autostop_dialog_message, projectName, seconds))
+            }
+            override fun onFinish() {
+                dialog.dismiss()
+                viewModel.stopTracking(event.trackingId)
+            }
+        }.start()
     }
 
     private fun redirectToLogin() {

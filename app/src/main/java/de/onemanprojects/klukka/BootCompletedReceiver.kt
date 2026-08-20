@@ -9,15 +9,22 @@ class BootCompletedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
         val prefs = AppPreferences(context)
-        if (!prefs.notificationsEnabled) return
         if (prefs.activeTrackingStartTime <= 0L) return
 
         TrackingAlarmScheduler.cancelAll(context)
-        if (prefs.durationAlertEnabled) {
-            TrackingAlarmScheduler.scheduleDurationAlarm(context, prefs.activeTrackingStartTime, prefs.durationAlertHours)
+        if (prefs.notificationsEnabled) {
+            if (prefs.durationAlertEnabled) {
+                TrackingAlarmScheduler.scheduleDurationAlarm(context, prefs.activeTrackingStartTime, prefs.durationAlertHours)
+            }
+            if (prefs.timeAlertEnabled) {
+                TrackingAlarmScheduler.scheduleTimeAlarm(context, prefs.timeAlertHour, prefs.timeAlertMinute)
+            }
         }
-        if (prefs.timeAlertEnabled) {
-            TrackingAlarmScheduler.scheduleTimeAlarm(context, prefs.timeAlertHour, prefs.timeAlertMinute)
+        if (prefs.autostopDurationEnabled) {
+            TrackingAlarmScheduler.scheduleAutostopDurationAlarm(context, prefs.activeTrackingStartTime, prefs.autostopDurationHours)
+        }
+        if (prefs.autostopTimeEnabled) {
+            TrackingAlarmScheduler.scheduleAutostopTimeAlarm(context, prefs.autostopTimeHour, prefs.autostopTimeMinute)
         }
         AppLogger.d("BootCompletedReceiver", "Alarms rescheduled after boot")
     }

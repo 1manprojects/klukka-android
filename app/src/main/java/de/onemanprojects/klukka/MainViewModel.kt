@@ -118,6 +118,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val prefs = AppPreferences(ctx)
         prefs.activeTrackingStartTime = 0L
         prefs.activeTrackingProjectName = ""
+        prefs.autostopPending = false
         TrackingAlarmScheduler.cancelAll(ctx)
     }
 
@@ -127,13 +128,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val projectName = event.project.title ?: ""
         prefs.activeTrackingStartTime = event.startTime
         prefs.activeTrackingProjectName = projectName
-        if (!prefs.notificationsEnabled) return
         TrackingAlarmScheduler.cancelAll(ctx)
-        if (prefs.durationAlertEnabled) {
-            TrackingAlarmScheduler.scheduleDurationAlarm(ctx, event.startTime, prefs.durationAlertHours)
+        if (prefs.notificationsEnabled) {
+            if (prefs.durationAlertEnabled) {
+                TrackingAlarmScheduler.scheduleDurationAlarm(ctx, event.startTime, prefs.durationAlertHours)
+            }
+            if (prefs.timeAlertEnabled) {
+                TrackingAlarmScheduler.scheduleTimeAlarm(ctx, prefs.timeAlertHour, prefs.timeAlertMinute)
+            }
         }
-        if (prefs.timeAlertEnabled) {
-            TrackingAlarmScheduler.scheduleTimeAlarm(ctx, prefs.timeAlertHour, prefs.timeAlertMinute)
+        if (prefs.autostopDurationEnabled) {
+            TrackingAlarmScheduler.scheduleAutostopDurationAlarm(ctx, event.startTime, prefs.autostopDurationHours)
+        }
+        if (prefs.autostopTimeEnabled) {
+            TrackingAlarmScheduler.scheduleAutostopTimeAlarm(ctx, prefs.autostopTimeHour, prefs.autostopTimeMinute)
         }
     }
 }

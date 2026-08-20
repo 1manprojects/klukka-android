@@ -40,6 +40,33 @@ class AppPreferences(context: Context) {
         get() = prefs.getInt(KEY_TIME_ALERT_MINUTE, 0)
         set(value) = prefs.edit().putInt(KEY_TIME_ALERT_MINUTE, value).apply()
 
+    // --- Autostop preferences ---
+
+    var autostopDurationEnabled: Boolean
+        get() = prefs.getBoolean(KEY_AUTOSTOP_DURATION_ENABLED, false)
+        set(value) = prefs.edit().putBoolean(KEY_AUTOSTOP_DURATION_ENABLED, value).apply()
+
+    var autostopDurationHours: Int
+        get() = prefs.getInt(KEY_AUTOSTOP_DURATION_HOURS, 8)
+        set(value) = prefs.edit().putInt(KEY_AUTOSTOP_DURATION_HOURS, value).apply()
+
+    var autostopTimeEnabled: Boolean
+        get() = prefs.getBoolean(KEY_AUTOSTOP_TIME_ENABLED, false)
+        set(value) = prefs.edit().putBoolean(KEY_AUTOSTOP_TIME_ENABLED, value).apply()
+
+    var autostopTimeHour: Int
+        get() = prefs.getInt(KEY_AUTOSTOP_TIME_HOUR, 17)
+        set(value) = prefs.edit().putInt(KEY_AUTOSTOP_TIME_HOUR, value).apply()
+
+    var autostopTimeMinute: Int
+        get() = prefs.getInt(KEY_AUTOSTOP_TIME_MINUTE, 0)
+        set(value) = prefs.edit().putInt(KEY_AUTOSTOP_TIME_MINUTE, value).apply()
+
+    // Set by the alarm receiver when autostop fires; consumed + cleared by ActiveTrackingFragment
+    var autostopPending: Boolean
+        get() = prefs.getBoolean(KEY_AUTOSTOP_PENDING, false)
+        set(value) = prefs.edit().putBoolean(KEY_AUTOSTOP_PENDING, value).apply()
+
     // Tracking state cached for BroadcastReceiver access (no ViewModel available there)
     var activeTrackingStartTime: Long
         get() = prefs.getLong(KEY_ACTIVE_TRACKING_START, 0L)
@@ -58,6 +85,12 @@ class AppPreferences(context: Context) {
         private const val KEY_TIME_ALERT_ENABLED = "time_alert_enabled"
         private const val KEY_TIME_ALERT_HOUR = "time_alert_hour"
         private const val KEY_TIME_ALERT_MINUTE = "time_alert_minute"
+        private const val KEY_AUTOSTOP_DURATION_ENABLED = "autostop_duration_enabled"
+        private const val KEY_AUTOSTOP_DURATION_HOURS = "autostop_duration_hours"
+        private const val KEY_AUTOSTOP_TIME_ENABLED = "autostop_time_enabled"
+        private const val KEY_AUTOSTOP_TIME_HOUR = "autostop_time_hour"
+        private const val KEY_AUTOSTOP_TIME_MINUTE = "autostop_time_minute"
+        private const val KEY_AUTOSTOP_PENDING = "autostop_pending"
         private const val KEY_ACTIVE_TRACKING_START = "active_tracking_start"
         private const val KEY_ACTIVE_TRACKING_PROJECT = "active_tracking_project"
 

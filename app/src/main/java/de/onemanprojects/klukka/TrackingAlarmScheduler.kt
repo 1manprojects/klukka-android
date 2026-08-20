@@ -10,6 +10,8 @@ object TrackingAlarmScheduler {
 
     private const val REQUEST_DURATION = 100
     private const val REQUEST_TIME = 101
+    private const val REQUEST_AUTOSTOP_DURATION = 102
+    private const val REQUEST_AUTOSTOP_TIME = 103
 
     fun scheduleDurationAlarm(context: Context, startTimeMillis: Long, hours: Int) {
         val triggerAt = startTimeMillis + hours * 3600L * 1000L
@@ -36,9 +38,34 @@ object TrackingAlarmScheduler {
         AppLogger.d("TrackingAlarmScheduler", "Time alarm set for $hour:$minute")
     }
 
+    fun scheduleAutostopDurationAlarm(context: Context, startTimeMillis: Long, hours: Int) {
+        val triggerAt = startTimeMillis + hours * 3600L * 1000L
+        val scheduleAt = if (triggerAt <= System.currentTimeMillis()) System.currentTimeMillis() + 1_000L else triggerAt
+        val pendingIntent = buildPendingIntent(context, REQUEST_AUTOSTOP_DURATION, TrackingAlarmReceiver.ALARM_AUTOSTOP_DURATION)
+        alarmManager(context).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, scheduleAt, pendingIntent)
+        AppLogger.d("TrackingAlarmScheduler", "Autostop duration alarm set for +${hours}h from start")
+    }
+
+    fun scheduleAutostopTimeAlarm(context: Context, hour: Int, minute: Int) {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        if (calendar.timeInMillis <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        val pendingIntent = buildPendingIntent(context, REQUEST_AUTOSTOP_TIME, TrackingAlarmReceiver.ALARM_AUTOSTOP_TIME)
+        alarmManager(context).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+        AppLogger.d("TrackingAlarmScheduler", "Autostop time alarm set for $hour:$minute")
+    }
+
     fun cancelAll(context: Context) {
         cancelPendingIntent(context, REQUEST_DURATION, TrackingAlarmReceiver.ALARM_DURATION)
         cancelPendingIntent(context, REQUEST_TIME, TrackingAlarmReceiver.ALARM_TIME)
+        cancelPendingIntent(context, REQUEST_AUTOSTOP_DURATION, TrackingAlarmReceiver.ALARM_AUTOSTOP_DURATION)
+        cancelPendingIntent(context, REQUEST_AUTOSTOP_TIME, TrackingAlarmReceiver.ALARM_AUTOSTOP_TIME)
         AppLogger.d("TrackingAlarmScheduler", "All alarms cancelled")
     }
 
