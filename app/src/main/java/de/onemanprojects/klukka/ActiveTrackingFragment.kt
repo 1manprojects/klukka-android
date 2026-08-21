@@ -156,10 +156,15 @@ class ActiveTrackingFragment : Fragment() {
         val projectName = event.project.title ?: ""
 
         AppPreferences(requireContext()).autostopPending = false
+        // The dialog now owns the countdown; cancel the background execute alarm/notification
+        // so tracking isn't stopped a second time from behind the dialog.
+        TrackingAlarmScheduler.cancelAutostopExecuteAlarm(requireContext())
+        NotificationHelper.cancelAutostopNotification(requireContext())
 
+        val graceSeconds = TrackingAlarmReceiver.AUTOSTOP_GRACE_SECONDS
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.autostop_dialog_title)
-            .setMessage(getString(R.string.autostop_dialog_message, projectName, 30))
+            .setMessage(getString(R.string.autostop_dialog_message, projectName, graceSeconds))
             .setPositiveButton(R.string.autostop_keep_tracking) { d, _ ->
                 autostopCountdown?.cancel()
                 d.dismiss()
@@ -170,7 +175,7 @@ class ActiveTrackingFragment : Fragment() {
         autostopDialog = dialog
         dialog.show()
 
-        autostopCountdown = object : CountDownTimer(30_000L, 1_000L) {
+        autostopCountdown = object : CountDownTimer(graceSeconds * 1_000L, 1_000L) {
             override fun onTick(millisUntilFinished: Long) {
                 val seconds = (millisUntilFinished / 1000L).toInt() + 1
                 dialog.setMessage(getString(R.string.autostop_dialog_message, projectName, seconds))

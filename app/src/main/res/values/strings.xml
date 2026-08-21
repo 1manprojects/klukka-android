@@ -162,4 +162,9 @@
     <string name="autostop_dialog_title">Tracking will be stopped</string>
     <string name="autostop_dialog_message">"%1$s" will be stopped in %2$d second(s).\nTap Keep Tracking to cancel.</string>
     <string name="autostop_keep_tracking">Keep Tracking</string>
+    <string name="notif_autostop_title">Tracking will stop soon</string>
+    <string name="notif_autostop_text">"%1$s" will be stopped in %2$d seconds unless you ignore this.</string>
+    <string name="notif_autostop_ignore">Ignore</string>
+    <string name="notif_autostopped_title">Tracking stopped</string>
+    <string name="notif_autostopped_text">"%1$s" was stopped automatically</string>
 </resources>

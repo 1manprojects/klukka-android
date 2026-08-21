@@ -76,6 +76,12 @@ class AppPreferences(context: Context) {
         get() = prefs.getString(KEY_ACTIVE_TRACKING_PROJECT, "") ?: ""
         set(value) = prefs.edit().putString(KEY_ACTIVE_TRACKING_PROJECT, value).apply()
 
+    // Needed so a background alarm/notification action can stop tracking via the API
+    // without a running Activity/ViewModel.
+    var activeTrackingId: Int
+        get() = prefs.getInt(KEY_ACTIVE_TRACKING_ID, -1)
+        set(value) = prefs.edit().putInt(KEY_ACTIVE_TRACKING_ID, value).apply()
+
     companion object {
         private const val KEY_DEBUG_LOGGING = "debug_logging"
         private const val KEY_THEME_MODE = "theme_mode"
@@ -93,6 +99,7 @@ class AppPreferences(context: Context) {
         private const val KEY_AUTOSTOP_PENDING = "autostop_pending"
         private const val KEY_ACTIVE_TRACKING_START = "active_tracking_start"
         private const val KEY_ACTIVE_TRACKING_PROJECT = "active_tracking_project"
+        private const val KEY_ACTIVE_TRACKING_ID = "active_tracking_id"
 
         const val THEME_LIGHT = "light"
         const val THEME_DARK = "dark"

@@ -26,6 +26,11 @@ class BootCompletedReceiver : BroadcastReceiver() {
         if (prefs.autostopTimeEnabled) {
             TrackingAlarmScheduler.scheduleAutostopTimeAlarm(context, prefs.autostopTimeHour, prefs.autostopTimeMinute)
         }
+        // An autostop warning that fired before reboot would have lost its execute alarm; restart the grace period.
+        if (prefs.autostopPending) {
+            NotificationHelper.showAutostopNotification(context, prefs.activeTrackingProjectName, TrackingAlarmReceiver.AUTOSTOP_GRACE_SECONDS)
+            TrackingAlarmScheduler.scheduleAutostopExecuteAlarm(context, TrackingAlarmReceiver.AUTOSTOP_GRACE_SECONDS)
+        }
         AppLogger.d("BootCompletedReceiver", "Alarms rescheduled after boot")
     }
 }

@@ -12,6 +12,7 @@ object TrackingAlarmScheduler {
     private const val REQUEST_TIME = 101
     private const val REQUEST_AUTOSTOP_DURATION = 102
     private const val REQUEST_AUTOSTOP_TIME = 103
+    private const val REQUEST_AUTOSTOP_EXECUTE = 104
 
     fun scheduleDurationAlarm(context: Context, startTimeMillis: Long, hours: Int) {
         val triggerAt = startTimeMillis + hours * 3600L * 1000L
@@ -61,11 +62,25 @@ object TrackingAlarmScheduler {
         AppLogger.d("TrackingAlarmScheduler", "Autostop time alarm set for $hour:$minute")
     }
 
+    /** Scheduled when an autostop warning fires while the app is backgrounded. Actually
+     *  stops tracking after [delaySeconds] unless cancelled via the notification's Ignore action. */
+    fun scheduleAutostopExecuteAlarm(context: Context, delaySeconds: Int) {
+        val triggerAt = System.currentTimeMillis() + delaySeconds * 1000L
+        val pendingIntent = buildPendingIntent(context, REQUEST_AUTOSTOP_EXECUTE, TrackingAlarmReceiver.ALARM_AUTOSTOP_EXECUTE)
+        alarmManager(context).setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+        AppLogger.d("TrackingAlarmScheduler", "Autostop execute alarm set for +${delaySeconds}s")
+    }
+
+    fun cancelAutostopExecuteAlarm(context: Context) {
+        cancelPendingIntent(context, REQUEST_AUTOSTOP_EXECUTE, TrackingAlarmReceiver.ALARM_AUTOSTOP_EXECUTE)
+    }
+
     fun cancelAll(context: Context) {
         cancelPendingIntent(context, REQUEST_DURATION, TrackingAlarmReceiver.ALARM_DURATION)
         cancelPendingIntent(context, REQUEST_TIME, TrackingAlarmReceiver.ALARM_TIME)
         cancelPendingIntent(context, REQUEST_AUTOSTOP_DURATION, TrackingAlarmReceiver.ALARM_AUTOSTOP_DURATION)
         cancelPendingIntent(context, REQUEST_AUTOSTOP_TIME, TrackingAlarmReceiver.ALARM_AUTOSTOP_TIME)
+        cancelAutostopExecuteAlarm(context)
         AppLogger.d("TrackingAlarmScheduler", "All alarms cancelled")
     }
 

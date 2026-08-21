@@ -118,8 +118,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val prefs = AppPreferences(ctx)
         prefs.activeTrackingStartTime = 0L
         prefs.activeTrackingProjectName = ""
+        prefs.activeTrackingId = -1
         prefs.autostopPending = false
         TrackingAlarmScheduler.cancelAll(ctx)
+        NotificationHelper.cancelAutostopNotification(ctx)
     }
 
     private fun scheduleNotificationAlarms(event: TrackingStartedEvent) {
@@ -128,6 +130,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val projectName = event.project.title ?: ""
         prefs.activeTrackingStartTime = event.startTime
         prefs.activeTrackingProjectName = projectName
+        prefs.activeTrackingId = event.trackingId
         TrackingAlarmScheduler.cancelAll(ctx)
         if (prefs.notificationsEnabled) {
             if (prefs.durationAlertEnabled) {
