@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,21 +17,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp">
 
                 <!-- Appearance Section -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
                     android:text="@string/settings_appearance_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:textColor="?attr/colorPrimary" />
 
                 <com.google.android.material.card.MaterialCardView
+                    style="?attr/materialCardViewOutlinedStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -43,8 +47,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:singleSelection="true"
-                            app:selectionRequired="true"
-                            xmlns:app="http://schemas.android.com/apk/res-auto">
+                            app:selectionRequired="true">
 
                             <Button
                                 android:id="@+id/btn_theme_light"
@@ -80,16 +83,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
                     android:text="@string/settings_notifications_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:textColor="?attr/colorPrimary" />
 
                 <com.google.android.material.card.MaterialCardView
+                    style="?attr/materialCardViewOutlinedStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    xmlns:app="http://schemas.android.com/apk/res-auto">
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -104,12 +108,28 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/notif_enable_label"
-                                android:textAppearance="?attr/textAppearanceBodyLarge" />
+                                android:layout_marginEnd="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/notif_enable_label"
+                                    android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="@string/notif_enable_caption"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            </LinearLayout>
 
                             <com.google.android.material.materialswitch.MaterialSwitch
                                 android:id="@+id/switch_notifications_enabled"
@@ -126,26 +146,36 @@
                             android:orientation="vertical"
                             android:visibility="gone">
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginTop="16dp"
-                                android:layout_marginBottom="16dp"
-                                android:background="?attr/colorOutlineVariant" />
-
                             <!-- Duration alert toggle -->
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginTop="20dp"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical">
 
-                                <TextView
+                                <LinearLayout
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="@string/notif_duration_label"
-                                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                                    android:layout_marginEnd="16dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/notif_duration_label"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:text="@string/notif_duration_caption"
+                                        android:textAppearance="?attr/textAppearanceBodySmall"
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                </LinearLayout>
 
                                 <com.google.android.material.materialswitch.MaterialSwitch
                                     android:id="@+id/switch_duration_alert"
@@ -172,26 +202,36 @@
 
                             </com.google.android.material.textfield.TextInputLayout>
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginTop="16dp"
-                                android:layout_marginBottom="16dp"
-                                android:background="?attr/colorOutlineVariant" />
-
                             <!-- Time alert toggle -->
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginTop="20dp"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical">
 
-                                <TextView
+                                <LinearLayout
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="@string/notif_time_label"
-                                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                                    android:layout_marginEnd="16dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/notif_time_label"
+                                        android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:text="@string/notif_time_caption"
+                                        android:textAppearance="?attr/textAppearanceBodySmall"
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                </LinearLayout>
 
                                 <com.google.android.material.materialswitch.MaterialSwitch
                                     android:id="@+id/switch_time_alert"
@@ -229,16 +269,25 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="4dp"
                     android:text="@string/settings_autostop_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:textColor="?attr/colorPrimary" />
 
-                <com.google.android.material.card.MaterialCardView
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    xmlns:app="http://schemas.android.com/apk/res-auto">
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/autostop_section_caption"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                <com.google.android.material.card.MaterialCardView
+                    style="?attr/materialCardViewOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -253,12 +302,28 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/autostop_duration_label"
-                                android:textAppearance="?attr/textAppearanceBodyMedium" />
+                                android:layout_marginEnd="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/autostop_duration_label"
+                                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="@string/autostop_duration_caption"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            </LinearLayout>
 
                             <com.google.android.material.materialswitch.MaterialSwitch
                                 android:id="@+id/switch_autostop_duration"
@@ -285,26 +350,36 @@
 
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="16dp"
-                            android:layout_marginBottom="16dp"
-                            android:background="?attr/colorOutlineVariant" />
-
                         <!-- Time autostop toggle -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
                             android:orientation="horizontal"
                             android:gravity="center_vertical">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/autostop_time_label"
-                                android:textAppearance="?attr/textAppearanceBodyMedium" />
+                                android:layout_marginEnd="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/autostop_time_label"
+                                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="@string/autostop_time_caption"
+                                    android:textAppearance="?attr/textAppearanceBodySmall"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                            </LinearLayout>
 
                             <com.google.android.material.materialswitch.MaterialSwitch
                                 android:id="@+id/switch_autostop_time"
@@ -340,15 +415,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
                     android:text="@string/settings_account_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:textColor="?attr/colorPrimary" />
 
                 <com.google.android.material.card.MaterialCardView
+                    style="?attr/materialCardViewOutlinedStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -378,6 +455,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
                     android:text="@string/settings_tokens_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
@@ -393,7 +471,6 @@
                     android:id="@+id/tv_no_tokens"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
                     android:paddingVertical="8dp"
                     android:text="@string/settings_no_tokens"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
@@ -404,7 +481,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
                     android:text="@string/settings_groups_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
@@ -420,7 +497,6 @@
                     android:id="@+id/tv_no_groups"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
                     android:paddingVertical="8dp"
                     android:text="@string/settings_no_groups"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
@@ -431,16 +507,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"
                     android:text="@string/settings_data_section"
                     android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:textColor="?attr/colorPrimary" />
 
                 <com.google.android.material.card.MaterialCardView
+                    style="?attr/materialCardViewOutlinedStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
+                    app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -470,20 +547,14 @@
                             android:layout_marginTop="8dp"
                             android:indeterminate="true"
                             android:visibility="gone"
-                            app:trackCornerRadius="0dp"
-                            xmlns:app="http://schemas.android.com/apk/res-auto" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginVertical="16dp"
-                            android:background="?attr/colorOutlineVariant" />
+                            app:trackCornerRadius="0dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_import_data"
                             style="?attr/materialButtonOutlinedStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
                             android:text="@string/settings_import_data_btn" />
 
                         <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -493,8 +564,7 @@
                             android:layout_marginTop="8dp"
                             android:indeterminate="true"
                             android:visibility="gone"
-                            app:trackCornerRadius="0dp"
-                            xmlns:app="http://schemas.android.com/apk/res-auto" />
+                            app:trackCornerRadius="0dp" />
 
                     </LinearLayout>
 
@@ -507,21 +577,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="32dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/logout_btn"
-                    xmlns:app="http://schemas.android.com/apk/res-auto" />
+                    android:text="@string/logout_btn" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_delete_account"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="12dp"
                     android:layout_marginBottom="16dp"
                     android:text="@string/delete_account_btn"
                     android:textColor="?attr/colorError"
-                    app:strokeColor="?attr/colorError"
-                    xmlns:app="http://schemas.android.com/apk/res-auto" />
+                    app:strokeColor="?attr/colorError" />
 
             </LinearLayout>
 

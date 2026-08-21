@@ -141,9 +141,12 @@
     <!-- Notifications settings -->
     <string name="settings_notifications_section">Notifications</string>
     <string name="notif_enable_label">Enable notifications</string>
-    <string name="notif_duration_label">Alert after tracking exceeds duration</string>
+    <string name="notif_enable_caption">Get alerted about long-running tracking sessions</string>
+    <string name="notif_duration_label">Alert after a duration</string>
+    <string name="notif_duration_caption">Notify once a session has been tracked for a set number of hours</string>
     <string name="notif_duration_hours_hint">Hours (e.g. 8)</string>
-    <string name="notif_time_label">Alert if still tracking past time</string>
+    <string name="notif_time_label">Alert at a time of day</string>
+    <string name="notif_time_caption">Notify if still tracking past a specific time</string>
     <string name="notif_time_hint">Time (tap to pick)</string>
     <string name="notif_channel_name">Tracking Alerts</string>
     <string name="notif_channel_description">Alerts when active tracking exceeds configured limits</string>
@@ -155,9 +158,12 @@
 
     <!-- Autostop settings -->
     <string name="settings_autostop_section">Auto-stop</string>
-    <string name="autostop_duration_label">Stop after tracking exceeds duration</string>
+    <string name="autostop_section_caption">You\'ll always get a warning before tracking stops, with a chance to keep going.</string>
+    <string name="autostop_duration_label">Stop after a duration</string>
+    <string name="autostop_duration_caption">Automatically stop tracking after a set number of hours</string>
     <string name="autostop_duration_hours_hint">Hours (e.g. 8)</string>
-    <string name="autostop_time_label">Stop at time</string>
+    <string name="autostop_time_label">Stop at a time of day</string>
+    <string name="autostop_time_caption">Automatically stop tracking at a specific time</string>
     <string name="autostop_time_hint">Time (tap to pick)</string>
     <string name="autostop_dialog_title">Tracking will be stopped</string>
     <string name="autostop_dialog_message">"%1$s" will be stopped in %2$d second(s).\nTap Keep Tracking to cancel.</string>
